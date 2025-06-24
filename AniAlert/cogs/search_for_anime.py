@@ -1,6 +1,7 @@
 import discord
 from discord.ui import TextInput, Modal
-
+from providers import search_anime
+  
 class search_anime_input(Modal):
   def __init__(self):
     super().__init__(title="Search for Anime")

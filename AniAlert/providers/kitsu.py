@@ -25,15 +25,32 @@ def search_anime(query):
   )
 
   data = response.json()
-  found_animes = []
+  anime_data = []
 
   for anime in data['data']:
-    title = anime['attributes']['canonicalTitle']
-    found_animes.append(title)
+    attribute = anime['attributes']
 
-  print(found_animes)
+    kitsu_id = attribute.get('id', '-0')
+    title = attribute.get('canonicalTitle', 'Unknown Title')
+    show_type = attribute.get('showType', 'Unknown Type')
+    average_rating = attribute.get('averageRating', 'N/A')
+    synopsis = attribute.get('synopsis', 'No synopsis available')
+    episodes = attribute.get('episodeCount', -0)
+    length_per_episode = attribute.get('totalLength', -0)
+    image = attribute.get('posterImage', {}).get('original', '')
+
+
+    anime_data.append({
+      'kitsu_id':  kitsu_id,
+      'title': title,
+      'show_type': show_type,
+      'average_rating': average_rating,
+      'synopsis': synopsis,
+      'episodes': episodes,
+      'length_per_episode': length_per_episode,
+      'image': image
+    })
+
+  print(anime_data)
   
-  return found_animes, data
-
-
-searched_anime = search_anime('Cowboy bebop')
+  return anime_data
