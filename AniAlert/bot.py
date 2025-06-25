@@ -13,11 +13,10 @@ bot = commands.Bot(command_prefix="$", intents=intents)
 
 @bot.event
 async def on_ready():
-  await bot.tree.sync()
   print(f"Logged in as {bot.user}!")
   try:
     await bot.load_extension("cogs.anime_command")
-    print("Successfully loaded anime_command cog!")
+    print("Successfully loaded anime_command cog!") 
     
     print("Syncing application commands...")
     await bot.tree.sync()
@@ -33,4 +32,5 @@ async def on_command_error(context, error):
     else:
         await context.send(f"An error occurred: {error}")
         print(f"Error in command {context.command}: {error}")
+        
 bot.run(DISCORD_BOT_TOKEN)

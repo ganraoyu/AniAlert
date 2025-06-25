@@ -1,8 +1,9 @@
 import requests
-
+import json
 query = '''
 query($search: String){
   Media(search: $search, type: ANIME){
+    genres,
     id,
     title{
       romaji,
@@ -19,7 +20,7 @@ query($search: String){
 }
 '''
 
-def find_air_time(search):
+def fetch_anilist_data(search):
   response = requests.post(
     'https://graphql.anilist.co',
     json={'query': query, 'variables': {'search': search}}
@@ -27,5 +28,7 @@ def find_air_time(search):
   data = response.json()
   return data
 
-example = find_air_time('One Piece Film: Strong World Episode 0')
-print(example)
+
+if __name__ == '__main__':
+  response = json.dumps(fetch_anilist_data('One Piece Film: Strong World Episode 0'), indent=2, ensure_ascii=False)
+  print(response)

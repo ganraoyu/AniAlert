@@ -1,2 +1,2 @@
-from .kitsu import search_anime
-from .anilist import find_air_time
+from .kitsu import search_kitsu_anime
+from .anilist import fetch_anilist_data

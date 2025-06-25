@@ -1,6 +1,6 @@
 import discord
 from discord.ui import TextInput, Modal
-from providers import search_anime
+from providers import search_kitsu_anime
   
 class search_anime_input(Modal):
   def __init__(self):

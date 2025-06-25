@@ -13,7 +13,7 @@ response = requests.get(
   headers=headers
 )
 
-def search_anime(query):
+def search_kitsu_anime(query):
   if ' ' in query:
     new_query = query.replace(' ', '%20')
     print(new_query)
@@ -35,6 +35,7 @@ def search_anime(query):
     title = attribute.get('canonicalTitle', 'Unknown Title')
     show_type = attribute.get('showType', 'Unknown Type')
     average_rating = attribute.get('averageRating', 'N/A')
+    ranking = attribute.get('ratingRank', 'N/A')
     synopsis = attribute.get('synopsis', 'No synopsis available')
     episodes = attribute.get('episodeCount', -0)
     length_per_episode = attribute.get('totalLength', -0)
@@ -46,6 +47,7 @@ def search_anime(query):
       'title': title,
       'show_type': show_type,
       'average_rating': average_rating,
+      'ranking': ranking,
       'synopsis': synopsis,
       'episodes': episodes,
       'length_per_episode': length_per_episode,
@@ -54,5 +56,7 @@ def search_anime(query):
 
   return anime_data
 
-example = search_anime('one piece')
-print(json.dumps(example, indent=4, ensure_ascii=False))
+if __name__ == '__main__':
+  example = search_kitsu_anime('Black Butler: Book of the Atlantic')
+  print(json.dumps(example, indent=4, ensure_ascii=False))
+

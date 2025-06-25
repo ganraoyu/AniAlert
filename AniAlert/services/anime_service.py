@@ -1,7 +1,6 @@
 import json
 
-from AniAlert.providers import find_air_time
-from AniAlert.providers import search_anime
+from providers import fetch_anilist_data, search_kitsu_anime
 
 def extract_airing_nodes(air_time):
   media = air_time.get('data', {}).get('Media') if air_time else None
@@ -9,29 +8,51 @@ def extract_airing_nodes(air_time):
   nodes = airing_schedule.get('nodes') if airing_schedule else None
   return nodes
 
-def attach_episodes_info(anime, nodes, index):
-  if isinstance(nodes, dict):
-    nodes = [nodes]
+def extract_genres(anime): 
+   media = anime.get('data', {}).get('Media') if anime else None
+   genres = media.get('genres') if media else None
+   return genres
 
-  anime['upcoming_episodes'] = nodes
-  anime['episodes'] = nodes[index]['episode'] - 1 if nodes else None
-  return anime
+# This is needed since Kitsu does't provide episodes of current airing animes
+def extract_episodes(anime, nodes, index):
+    if isinstance(nodes, dict):
+        nodes = [nodes]
+
+    anime['upcoming_episodes'] = nodes
+
+    if nodes:
+        episodes_val = anime.get('episodes')
+        if episodes_val is None or (isinstance(episodes_val, str) and episodes_val.lower() == 'none') or int(episodes_val) <= 0:
+            anime['episodes'] = nodes[index]['episode'] - 1
+    else:
+        return
+
+    return anime
 
 def get_full_anime_info(name):
-  anime_list = search_anime(name)
+    
+    anime_list = search_kitsu_anime(name)
 
-  for index, anime in enumerate(anime_list):
-    title = anime.get('title') or name
-    air_time = find_air_time(title)
+    for index, anime in enumerate(anime_list):
+        title = anime.get('title') or name
 
-    nodes = extract_airing_nodes(air_time)
-    if not nodes:
-      continue
+        anilist_data = fetch_anilist_data(title)  
 
-    print(nodes)
-    attach_episodes_info(anime, nodes, index)
+        if not anilist_data:
+            anime['genres'] = []
+            anime['airing'] = False
+            continue
 
-  return anime_list
+        nodes = extract_airing_nodes(anilist_data)
+        anime['genres'] = ' '.join(anilist_data.get('genres', []))
+        anime['airing'] = bool(nodes)
+        extract_episodes(anime, nodes, index)
+        # Optional: add airing info like upcoming episodes
 
-example = get_full_anime_info('one piece')
-print(json.dumps(example, indent=2, ensure_ascii=False))
+    return anime_list
+
+
+if __name__ == '__main__':
+  example = get_full_anime_info('one piece')  
+  print(json.dumps(example, indent=2, ensure_ascii=False))
+

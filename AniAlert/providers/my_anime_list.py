@@ -10,11 +10,6 @@ headers = {
     'X-MAL-CLIENT-ID': client_id,
 }
 
-response = requests.get(
-    'https://api.myanimelist.net/v2/anime?q=naruto&limit=1',
-    headers=headers
-) 
-
 def search_anime(query, limit):
   response = requests.get(
     f'https://api.myanimelist.net/v2/anime?q={query}&limit={limit}',
