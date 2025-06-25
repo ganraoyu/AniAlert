@@ -27,5 +27,5 @@ def find_air_time(search):
   data = response.json()
   return data
 
-example = find_air_time('solo level')
+example = find_air_time('One Piece Film: Strong World Episode 0')
 print(example)

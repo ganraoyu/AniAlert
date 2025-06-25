@@ -1,3 +1,4 @@
+import json
 import requests
 
 headers = {
@@ -30,7 +31,7 @@ def search_anime(query):
   for anime in data['data']:
     attribute = anime['attributes']
 
-    kitsu_id = attribute.get('id', '-0')
+    kitsu_id = anime.get('id', '-0')
     title = attribute.get('canonicalTitle', 'Unknown Title')
     show_type = attribute.get('showType', 'Unknown Type')
     average_rating = attribute.get('averageRating', 'N/A')
@@ -51,6 +52,7 @@ def search_anime(query):
       'image': image
     })
 
-  print(anime_data)
-  
   return anime_data
+
+example = search_anime('one piece')
+print(json.dumps(example, indent=4, ensure_ascii=False))
