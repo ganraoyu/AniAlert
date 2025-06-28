@@ -31,8 +31,8 @@ class add_anime_command(commands.Cog):
       embed.add_field(name='⭐ Rating', value=str(anime['average_rating']), inline=True)
       embed.add_field(name='🎞️ Episodes', value=str(anime['episodes']), inline=True)
       embed.add_field(name='🗓️Airing', value=str(anime['airing']), inline=True)
-      embed.add_field(name='MAL Rank', value=str(anime['ranking']), inline=True)
-      # embed.add_field(name='Genres', value=str(anime['genres']), inline=True)
+      embed.add_field(name='🏆MAL Rank', value=str(anime['ranking']), inline=True)
+      embed.add_field(name='🎭Genres', value=str(anime['genres']), inline=True)
       embed.set_thumbnail(url=anime['image'])
 
       await interaction.followup.send(embed=embed, ephemeral=True)

@@ -39,14 +39,15 @@ def get_full_anime_info(name):
         anilist_data = fetch_anilist_data(title)  
 
         if not anilist_data:
-            anime['genres'] = []
+            anime['genres'] = 'Not Found'
             anime['airing'] = False
             continue
 
         nodes = extract_airing_nodes(anilist_data)
-        anime['genres'] = ' '.join(anilist_data.get('genres', []))
+        anime['genres'] = ' '.join(anilist_data.get('genres', 'N/A'))
         anime['airing'] = bool(nodes)
         extract_episodes(anime, nodes, index)
+
         # Optional: add airing info like upcoming episodes
 
     return anime_list
