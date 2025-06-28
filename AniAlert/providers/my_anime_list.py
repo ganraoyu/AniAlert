@@ -1,4 +1,5 @@
 import requests 
+import json
 from dotenv import load_dotenv
 import os
 
@@ -25,5 +26,6 @@ def search_anime(query, limit):
 
   return found_animes, data
 
-my_animes = search_anime('Bleach', 10)
-print(my_animes)
+if __name__ == '__main__':
+  response = search_anime('Bleach', 10)
+  print(json.dumps(response, indent=2, ensure_ascii=False))

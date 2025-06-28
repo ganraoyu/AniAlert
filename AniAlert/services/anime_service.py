@@ -1,6 +1,6 @@
 import json
 
-from providers import fetch_anilist_data, search_kitsu_anime
+from providers import search_by_title, search_kitsu_anime
 
 def extract_airing_nodes(air_time):
   media = air_time.get('data', {}).get('Media') if air_time else None
@@ -29,14 +29,16 @@ def extract_episodes(anime, nodes, index):
 
     return anime
 
-def get_full_anime_info(name):
+def get_full_anime_info(name, results_shown, media_type):
     
-    anime_list = search_kitsu_anime(name)
+    results = search_kitsu_anime(name)
+
+    anime_list = results[:results_shown]
 
     for index, anime in enumerate(anime_list):
         title = anime.get('title') or name
 
-        anilist_data = fetch_anilist_data(title)  
+        anilist_data = search_by_title(title)  
 
         if not anilist_data:
             anime['genres'] = 'Not Found'
@@ -44,7 +46,10 @@ def get_full_anime_info(name):
             continue
 
         nodes = extract_airing_nodes(anilist_data)
-        anime['genres'] = ' '.join(anilist_data.get('genres', 'N/A'))
+
+        genres = anilist_data.get('data', {}).get('Media', {}).get('genres', [])
+        anime['genres'] = ', '.join(genres) if genres else 'N/A'
+
         anime['airing'] = bool(nodes)
         extract_episodes(anime, nodes, index)
 

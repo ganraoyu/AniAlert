@@ -10,6 +10,7 @@ def build_search_anime_embed(anime: dict) -> discord.Embed:
     embed.add_field(name='⭐ Rating', value=str(anime['average_rating']), inline=True)
     embed.add_field(name='🎞️ Episodes', value=str(anime['episodes']), inline=True)
     embed.add_field(name='🗓️Airing', value=str(anime['airing']), inline=True)
-    embed.add_field(name='MAL Rank', value=str(anime['ranking']), inline=True)
+    embed.add_field(name='Rank', value=str(anime['ranking']), inline=True)
+    embed.add_field(name='Genres', value=str(anime['genres']), inline=True)
     embed.set_thumbnail(url=anime['image'])
     return embed
