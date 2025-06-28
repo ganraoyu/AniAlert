@@ -1,51 +1,57 @@
-import discord
 from discord.ext import commands
-from discord import app_commands
-from providers import search_kitsu_anime
-
-from cogs.anime_select import pick_anime_view
-from cogs.search_for_anime import search_anime_input
-
+from discord import app_commands, Interaction
 from services.anime_service import get_full_anime_info
+from utils.embed_builder import build_search_anime_embed
+from views.search_modal import SearchAnimeInput
+from views.pick_anime_view import PickAnimeView
 
-class add_anime_command(commands.Cog):
-  def __init__(self, bot):
-    self.bot = bot
+# Searches - Require user input
+# Look ups - No user input, just returns data
 
-  @app_commands.command(name='search_anime', description='Search for animes')
-  async def search_anime_slash(self, interaction: discord.Interaction, query: str):
-    await interaction.response.defer(ephemeral=True)
-    animes = get_full_anime_info(query)
+class SeasonalAnimeLookUpCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+    
+    @app_commands.command(name='search_seasonal_anime', description='Return currently airing seasonal anime')
+    async def seasonal_anime_slash():
+        pass
 
-    if not animes:
-      await interaction.followup.send('❌ No results found.', ephemeral=True)
-      return
+class AllAnimeSearchCog(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    for anime in animes:
-      embed = discord.Embed(
-        title=f'🎬 {anime["title"]}',
-        description=anime['synopsis'][:300] + '...',
-        color=discord.Color.purple()
-      )
-      embed.add_field(name='📺 Type', value=anime['show_type'], inline=True)
-      embed.add_field(name='⭐ Rating', value=str(anime['average_rating']), inline=True)
-      embed.add_field(name='🎞️ Episodes', value=str(anime['episodes']), inline=True)
-      embed.add_field(name='🗓️Airing', value=str(anime['airing']), inline=True)
-      embed.add_field(name='🏆MAL Rank', value=str(anime['ranking']), inline=True)
-      embed.add_field(name='🎭Genres', value=str(anime['genres']), inline=True)
-      embed.set_thumbnail(url=anime['image'])
+    # Slash command to search for animes
+    @app_commands.command(name='search_anime', description='Search for animes')
+    async def search_anime_slash(self, interaction: Interaction, query: str):
+        await interaction.response.defer(ephemeral=True)
+        animes = get_full_anime_info(query)
 
-      await interaction.followup.send(embed=embed, ephemeral=True)
+        if not animes:
+            await interaction.followup.send('❌ No results found.', ephemeral=True)
+            return
 
-  @app_commands.command(name='search_anime_modal', description='Open a modal to search for animes')
-  async def search_anime_modal(self, interaction: discord.Interaction):
-    modal = search_anime_input()
-    await interaction.response.send_modal(modal)
+        for anime in animes:
+            embed = build_search_anime_embed(anime)
+            await interaction.followup.send(embed=embed, ephemeral=True)
 
-  @commands.command()
-  async def pick_animes(self, context):
-    view = pick_anime_view()
-    await context.send('Please select animes:', view=view)
+    # Modal to search for animes
+    @app_commands.command(name='search_anime_modal', description='Open a modal to search for animes')
+    async def search_anime_modal(self, interaction: Interaction):
+        modal = SearchAnimeInput()
+        await interaction.response.send_modal(modal)
 
-async def setup(bot):
-  await bot.add_cog(add_anime_command(bot))
+    # Command to search for animes using a modal
+    @commands.command()
+    async def pick_animes(self, ctx):
+        view = PickAnimeView()
+        await ctx.send('Please select animes:', view=view)
+
+
+class CharacterSearchCog(commands.Cog):
+    pass 
+
+async def setup(bot):    
+    await bot.add_vog(SeasonalAnimeLookUpCog(bot))
+
+    await bot.add_cog(AllAnimeSearchCog(bot))
+    await bot.add_cog(CharacterSearchCog(bot))

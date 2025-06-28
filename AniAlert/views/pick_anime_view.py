@@ -1,7 +1,7 @@
 import discord
 from discord.ui import Select, View
 
-class pick_anime_select(Select):
+class PickAnimeSelect(Select):
   def __init__(self):
     options = [
       discord.SelectOption(
@@ -36,7 +36,7 @@ class pick_anime_select(Select):
     selected = ', '.join(self.values)
     await interaction.response.send_message(f"You picked: {selected}", ephemeral=True)
 
-class pick_anime_view(View):
+class PickAnimeView(View):
   def __init__(self):
     super().__init__()
-    self.add_item(pick_anime_select())
+    self.add_item(PickAnimeSelect())
