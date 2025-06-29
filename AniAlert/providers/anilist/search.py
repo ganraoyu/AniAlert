@@ -30,7 +30,7 @@ query($search: String){
 }
 '''
 
-def search_by_title(search):
+def search_anime_anilist(search):
     response = requests.post(
         'https://graphql.anilist.co',
         json={'query': query, 'variables': {'search': search}}
@@ -39,5 +39,5 @@ def search_by_title(search):
     return data
 
 if __name__ == '__main__':
-    response = search_by_title('One Piece Film: Strong World Episode 0')
+    response = search_anime_anilist('Solo Leveling: How to Get Stronger"')
     print(json.dumps(response, indent=2, ensure_ascii=False))

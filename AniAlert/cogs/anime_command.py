@@ -1,8 +1,13 @@
+from typing import Optional
+
 from discord.ext import commands
 from discord import app_commands, Interaction
 
 from services.anime_service import get_full_anime_info
+from services.anime_service import get_seasonal_anime_info
+
 from utils.embed_builder import build_search_anime_embed
+from utils.embed_builder import build_seasonal_anime_embed
 from views.search_modal import SearchAnimeInput
 from views.pick_anime_view import PickAnimeView
 
@@ -13,10 +18,16 @@ class SeasonalAnimeLookUpCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
 
-  @app_commands.command(name='search_seasonal_anime', description='Return currently airing seasonal anime')
-  async def seasonal_anime_slash(self, interaction: Interaction):
+  @app_commands.command(name='search_seasonal_anime', description='Look up currently airing seasonal anime')
+  async def seasonal_anime_slash(self, interaction: Interaction, page: int):
+    await interaction.response.send_message("Look up Seasonal Anime (Popularity).", ephemeral=True)
 
-    await interaction.response.send_message("Seasonal anime lookup not implemented yet.", ephemeral=True)
+    animes = get_seasonal_anime_info(page)
+    for anime in animes:
+      embed = build_seasonal_anime_embed(anime)
+
+    await interaction.followup.send(embed=embed, ephemeral=True)
+
 
 
 class AllAnimeSearchCog(commands.Cog):
@@ -31,11 +42,12 @@ class AllAnimeSearchCog(commands.Cog):
   )
   @app_commands.choices(
     media_type=[
+    app_commands.Choice(name='All', value='all'),
       app_commands.Choice(name="TV", value="TV"),
-      app_commands.Choice(name="Movie", value="MOVIE"),
+      app_commands.Choice(name="Movie", value="movie"),
       app_commands.Choice(name="OVA", value="OVA"),
       app_commands.Choice(name="ONA", value="ONA"),
-      app_commands.Choice(name="Special", value="SPECIAL")
+      app_commands.Choice(name="Special", value="special")
     ]
   )
   async def search_anime_slash(
@@ -43,11 +55,12 @@ class AllAnimeSearchCog(commands.Cog):
     interaction: Interaction,
     name: str,
     results_shown: int,
-    media_type: app_commands.Choice[str]
+    media_type: Optional[app_commands.Choice[str]] = None
   ):
     await interaction.response.defer(ephemeral=True)
 
-    animes = get_full_anime_info(name, results_shown, media_type.value)
+    media_value = media_type.value if media_type else "all"
+    animes = get_full_anime_info(name, results_shown, media_value)
 
     if not animes:
       await interaction.followup.send('❌ No results found.', ephemeral=True)
@@ -75,6 +88,6 @@ class CharacterSearchCog(commands.Cog):
 
 
 async def setup(bot):
-  # await bot.add_cog(SeasonalAnimeLookUpCog(bot))
+  await bot.add_cog(SeasonalAnimeLookUpCog(bot))
   await bot.add_cog(AllAnimeSearchCog(bot))
   await bot.add_cog(CharacterSearchCog(bot))

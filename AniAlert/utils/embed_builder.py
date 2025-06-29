@@ -1,6 +1,7 @@
 import discord
 
 def build_search_anime_embed(anime: dict) -> discord.Embed:
+    
     embed = discord.Embed(
         title=f'🎬 {anime["title"]}',
         description=anime['synopsis'][:300] + '...',
@@ -14,3 +15,13 @@ def build_search_anime_embed(anime: dict) -> discord.Embed:
     embed.add_field(name='Genres', value=str(anime['genres']), inline=True)
     embed.set_thumbnail(url=anime['image'])
     return embed
+
+def build_seasonal_anime_embed(anime: dict) -> discord.Embed:
+    embed = discord.Embed(
+        title=f'🎬 {anime["title"]}',
+        description=anime['synopsis'][:300] + '...',
+        color=discord.Color.blue()
+    )
+
+    return embed
+

@@ -13,7 +13,7 @@ response = requests.get(
   headers=headers
 )
 
-def search_kitsu_anime(query):
+def search_kitsu_anime(query: str):
   if ' ' in query:
     new_query = query.replace(' ', '%20')
     print(new_query)
@@ -21,7 +21,7 @@ def search_kitsu_anime(query):
     new_query = query
 
   response = requests.get(
-  f'https://kitsu.io/api/edge/anime?filter[text]={new_query}',
+  f'https://kitsu.io/api/edge/anime?filter[text]={new_query}&page[limit]=20',
   headers=headers
   )
 
@@ -57,6 +57,6 @@ def search_kitsu_anime(query):
   return anime_data
 
 if __name__ == '__main__':
-  example = search_kitsu_anime('Black Butler: Book of the Atlantic')
+  example = search_kitsu_anime('One piece')
   print(json.dumps(example, indent=4, ensure_ascii=False))
 
