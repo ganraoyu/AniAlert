@@ -8,6 +8,8 @@ from services.anime_service import get_seasonal_anime_info
 
 from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_seasonal_anime_embed
+from utils.button_builder import anime_buttons_view
+
 from views.search_modal import SearchAnimeInput
 from views.pick_anime_view import PickAnimeView
 
@@ -18,17 +20,19 @@ class SeasonalAnimeLookUpCog(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
 
-  @app_commands.command(name='search_seasonal_anime', description='Look up currently airing seasonal anime')
-  async def seasonal_anime_slash(self, interaction: Interaction, page: int):
+  @app_commands.command(name='seasonal_anime', description='Look up currently airing seasonal anime')
+  async def seasonal_anime_slash(self, interaction: Interaction, page: int, results_shown: int):
     await interaction.response.send_message("Look up Seasonal Anime (Popularity).", ephemeral=True)
 
-    animes = get_seasonal_anime_info(page)
+    animes = get_seasonal_anime_info(page, results_shown)
+
+    if not animes:
+      await interaction.followup.send('❌ No results found.', ephemeral=True)
+      return
+    
     for anime in animes:
       embed = build_seasonal_anime_embed(anime)
-
-    await interaction.followup.send(embed=embed, ephemeral=True)
-
-
+      await interaction.followup.send(embed=embed, ephemeral=True)
 
 class AllAnimeSearchCog(commands.Cog):
   def __init__(self, bot):
@@ -68,19 +72,9 @@ class AllAnimeSearchCog(commands.Cog):
 
     for anime in animes:
       embed = build_search_anime_embed(anime)
-      await interaction.followup.send(embed=embed, ephemeral=True)
+      buttons = anime_buttons_view(anime)
 
-  # Modal to search for animes
-  @app_commands.command(name='search_anime_modal', description='Open a modal to search for animes')
-  async def search_anime_modal(self, interaction: Interaction):
-    modal = SearchAnimeInput()
-    await interaction.response.send_modal(modal)
-
-  # Command to search for animes using a modal
-  @commands.command()
-  async def pick_animes(self, ctx):
-    view = PickAnimeView()
-    await ctx.send('Please select animes:', view=view)
+      await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
 
 class CharacterSearchCog(commands.Cog):

@@ -1,0 +1,2 @@
+YEAR = 2024
+SEASON = 'SUMMER'

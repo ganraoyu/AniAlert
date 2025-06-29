@@ -66,8 +66,8 @@ def get_full_anime_info(name: str, results_shown: int, media_type: str) -> list:
 
   return anime_list
 
-def get_seasonal_anime_info(page: int) -> list:
-  results = get_seasonal_animes_anilist(page)
+def get_seasonal_anime_info(page: int, results_shown:int) -> list:
+  results = get_seasonal_animes_anilist(page, results_shown)
 
   return results
 

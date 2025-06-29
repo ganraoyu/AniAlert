@@ -19,9 +19,10 @@ def build_search_anime_embed(anime: dict) -> discord.Embed:
 def build_seasonal_anime_embed(anime: dict) -> discord.Embed:
     embed = discord.Embed(
         title=f'🎬 {anime["title"]}',
-        description=anime['synopsis'][:300] + '...',
+        description=anime['synopsis'],
         color=discord.Color.blue()
     )
+    embed.set_thumbnail(url=anime['image'])
 
     return embed
 
