@@ -1,76 +1,101 @@
 import json
+from datetime import datetime
 from providers.anilist.search import search_anime_anilist
 from providers.anilist.seasonal import get_seasonal_animes_anilist
 from providers import search_kitsu_anime
 
 
 def extract_airing_nodes(air_time: dict):
-  media = air_time.get('data', {}).get('Media') if air_time else None
-  airing_schedule = media.get('airingSchedule') if media else None
-  nodes = airing_schedule.get('nodes') if airing_schedule else None
-  return nodes
+    media = air_time.get('data', {}).get('Media') if air_time else None
+    airing_schedule = media.get('airingSchedule') if media else None
+    nodes = airing_schedule.get('nodes') if airing_schedule else None
+    return nodes
+
 
 def extract_genres(anime: dict):
-  media = anime.get('data', {}).get('Media') if anime else None
-  genres = media.get('genres') if media else None
-  return genres
+    media = anime.get('data', {}).get('Media') if anime else None
+    genres = media.get('genres') if media else None
+    return genres
 
-# This is neede since Kitsu doesn't provide current airing anime episdoes
+
+# This is needed since Kitsu doesn't provide current airing anime episodes
 def extract_episodes(anime: dict, nodes: dict, index: int) -> dict:
-  if isinstance(nodes, dict):
-    nodes = [nodes]
+    if isinstance(nodes, dict):
+        nodes = [nodes]
 
-  anime['upcoming_episodes'] = nodes
+    anime['upcoming_episodes'] = nodes
 
-  if nodes:
-    episodes_val = anime.get('episodes')
-    if episodes_val is None or (isinstance(episodes_val, str) and episodes_val.lower() == 'none') or int(episodes_val) <= 0:
-      anime['episodes'] = nodes[index]['episode'] - 1
+    if nodes:
+        episodes_val = anime.get('episodes')
+        if (
+            episodes_val is None
+            or (isinstance(episodes_val, str) and episodes_val.lower() == 'none')
+            or int(episodes_val) <= 0
+        ):
+            anime['episodes'] = nodes[index]['episode'] - 1
 
-  return anime
+    return anime
+
 
 def get_full_anime_info(name: str, results_shown: int, media_type: str) -> list:
-  results = search_kitsu_anime(name)
-  anime_list = []
+    results = search_kitsu_anime(name)
+    anime_list = []
 
-  for anime in results:
-    if media_type == 'all':
-      anime_list = results 
-      break
-    elif anime.get('show_type') == media_type:
-      anime_list.append(anime)
+    for anime in results:
+        if media_type == 'all':
+            anime_list = results
+            break
+        elif anime.get('show_type') == media_type:
+            anime_list.append(anime)
 
-  anime_list = anime_list[:results_shown]
+    anime_list = anime_list[:results_shown]
 
-  for index, anime in enumerate(anime_list):
-    title = anime.get('title') or name
-    anilist_data = search_anime_anilist(title)
+    for index, anime in enumerate(anime_list):
+        title = anime.get('title') or name
+        anilist_data = search_anime_anilist(title)
 
-    if not anilist_data or not anilist_data.get('data'):
-        anime['genres'] = 'Not Found'
-        anime['airing'] = False
-        continue
+        if not anilist_data or not anilist_data.get('data'):
+            anime['genres'] = 'Not Found'
+            anime['airing'] = False
+            anime['timeUntilAiring'] = None
+            anime['airingAt'] = None
+            continue
 
-    media = anilist_data.get('data', {}).get('Media')
+        media = anilist_data.get('data', {}).get('Media')
 
-    if media is None:
-        anime['genres'] = 'Not Found'
-        anime['airing'] = False
-        continue
+        if media is None:
+            anime['genres'] = 'Not Found'
+            anime['airing'] = False
+            anime['timeUntilAiring'] = None
+            anime['airingAt'] = None
+            continue
 
-    nodes = extract_airing_nodes(anilist_data)
-    genres = media.get('genres', [])
-    anime['genres'] = ', '.join(genres) if genres else 'N/A'
-    anime['airing'] = bool(nodes)
-    extract_episodes(anime, nodes, index)
+        nodes = extract_airing_nodes(anilist_data)
+        genres = media.get('genres', [])
 
-  return anime_list
+        anime['genres'] = ', '.join(genres) if genres else 'N/A'
+        anime['airing'] = bool(nodes)
 
-def get_seasonal_anime_info(page: int, results_shown:int) -> list:
-  results = get_seasonal_animes_anilist(page, results_shown)
+        airing_time_stamps = media.get('airingSchedule', {}).get('nodes', [])
 
-  return results
+        if airing_time_stamps:
+            next_ep = airing_time_stamps[0]
+            anime['timeUntilAiring'] = next_ep.get('timeUntilAiring')  # already string like "2d 11h 30m 36s"
+            anime['airingAt'] = next_ep.get('airingAt')  # already ISO datetime string like "2025-07-02T15:26:00"
+        else:
+            anime['timeUntilAiring'] = None
+            anime['airingAt'] = None
+
+        extract_episodes(anime, nodes, index)
+
+    return anime_list
+
+
+def get_seasonal_anime_info(page: int, results_shown: int) -> list:
+    results = get_seasonal_animes_anilist(page, results_shown)
+    return results
+
 
 if __name__ == '__main__':
-  example = get_full_anime_info('one piece', 5, 'TV')
-  print(json.dumps(example, indent=2, ensure_ascii=False))
+    example = get_full_anime_info('one piece', 5, 'TV')
+    print(json.dumps(example, indent=2, ensure_ascii=False))

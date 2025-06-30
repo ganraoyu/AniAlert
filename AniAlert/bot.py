@@ -28,9 +28,9 @@ async def on_ready():
 @bot.event
 async def on_command_error(context, error):
     if isinstance(error, commands.CommandNotFound):
-        await context.send("Command not found. Please check the command and try again.")
+      await context.send("Command not found. Please check the command and try again.")
     else:
-        await context.send(f"An error occurred: {error}")
-        print(f"Error in command {context.command}: {error}")
+      await context.send(f"An error occurred: {error}")
+      print(f"Error in command {context.command}: {error}")
         
 bot.run(DISCORD_BOT_TOKEN)

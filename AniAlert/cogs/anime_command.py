@@ -8,6 +8,7 @@ from services.anime_service import get_seasonal_anime_info
 
 from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_seasonal_anime_embed
+
 from utils.button_builder import anime_buttons_view
 
 from views.search_modal import SearchAnimeInput
@@ -73,9 +74,8 @@ class AllAnimeSearchCog(commands.Cog):
     for anime in animes:
       embed = build_search_anime_embed(anime)
       buttons = anime_buttons_view(anime)
-
+      
       await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
-
 
 class CharacterSearchCog(commands.Cog):
   pass

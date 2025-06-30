@@ -72,7 +72,8 @@ def get_seasonal_animes_anilist(page: int, perPage: int):
         synopsis = anime.get('description', '')
         image = anime.get('coverImage', {}).get('extraLarge')
 
-        # Anilsit does some weird shit when they webscrape idk
+
+        # Anilist does some weird shit when they webscrape idk
         words = ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>']
         
         for word in words:
@@ -89,7 +90,6 @@ def get_seasonal_animes_anilist(page: int, perPage: int):
     
     return anime_data
 
-# Example use
 if __name__ == '__main__':
     result = get_seasonal_animes_anilist(1, 1)
     print(json.dumps(result, indent=2, ensure_ascii=False))
