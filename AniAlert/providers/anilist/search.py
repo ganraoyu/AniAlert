@@ -52,6 +52,7 @@ def search_anime_anilist(search):
     nodes = data['data']['Media']['airingSchedule']['nodes']
 
     for episode in nodes:
+        episode['airingAt_unix'] = episode['airingAt']
         episode['airingAt'] = datetime.utcfromtimestamp(episode['airingAt']).isoformat()
         episode['timeUntilAiring'] = break_down_time(episode['timeUntilAiring'])
 

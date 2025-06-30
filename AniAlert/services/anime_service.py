@@ -81,10 +81,12 @@ def get_full_anime_info(name: str, results_shown: int, media_type: str) -> list:
         if airing_time_stamps:
             next_ep = airing_time_stamps[0]
             anime['timeUntilAiring'] = next_ep.get('timeUntilAiring')  # already string like "2d 11h 30m 36s"
-            anime['airingAt'] = next_ep.get('airingAt')  # already ISO datetime string like "2025-07-02T15:26:00"
+            anime['airingAt_iso'] = next_ep.get('airingAt')  # already ISO datetime string like "2025-07-02T15:26:00"
+            anime['airingAt_unix'] = next_ep.get('airingAt_unix')
         else:
             anime['timeUntilAiring'] = None
             anime['airingAt'] = None
+            anime['auringAt_unix'] = None
 
         extract_episodes(anime, nodes, index)
 

@@ -1,3 +1,9 @@
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from db.database import cursor, conn
+
 from typing import Optional
 
 from discord.ext import commands
@@ -80,7 +86,18 @@ class AllAnimeSearchCog(commands.Cog):
 class CharacterSearchCog(commands.Cog):
   pass
 
+class CheckNotifyListCog(commands.Cog):
+  def __init__(self, bot):
+    self.bot = bot
 
+    @app_commands.command(name='list', description='Check notify list')
+    async def check_notify_list(self, interaction: Interaction):
+      cursor.execute('SELECT * FROM anime_notify_list')
+
+      
+
+
+    
 async def setup(bot):
   await bot.add_cog(SeasonalAnimeLookUpCog(bot))
   await bot.add_cog(AllAnimeSearchCog(bot))
