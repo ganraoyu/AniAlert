@@ -6,17 +6,18 @@ from db.database import cursor
 
 from typing import Optional
 
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands, Interaction
 
 from services.anime_service import get_full_anime_info
 from services.anime_service import get_seasonal_anime_info
+from services.airing_checker import check_notify_list, check_if_aired 
 
 from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_seasonal_anime_embed
 from utils.embed_builder import build_anime_notify_list_embed
+from utils.embed_builder import build_anime_airing_notification_embed
 from utils.interaction_helper import get_user_and_guild_ids
-
 from utils.button_builder import anime_buttons_view
 
 from views.search_modal import SearchAnimeInput
@@ -38,7 +39,7 @@ class SeasonalAnimeLookUpCog(commands.Cog):
     if not animes:
       await interaction.followup.send('❌ No results found.', ephemeral=True)
       return
-    
+
     for anime in animes:
       embed = build_seasonal_anime_embed(anime)
       await interaction.followup.send(embed=embed, ephemeral=True)
@@ -55,7 +56,7 @@ class AllAnimeSearchCog(commands.Cog):
   )
   @app_commands.choices(
     media_type=[
-    app_commands.Choice(name='All', value='all'),
+      app_commands.Choice(name='All', value='all'),
       app_commands.Choice(name="TV", value="TV"),
       app_commands.Choice(name="Movie", value="movie"),
       app_commands.Choice(name="OVA", value="OVA"),
@@ -82,9 +83,8 @@ class AllAnimeSearchCog(commands.Cog):
     for anime in animes:
       embed = build_search_anime_embed(anime)
       buttons = anime_buttons_view(anime)
-      
-      await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
+      await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
 class CheckNotifyListCog(commands.Cog):
   def __init__(self, bot, cursor):
@@ -95,7 +95,7 @@ class CheckNotifyListCog(commands.Cog):
   async def check_notify_list(self, interaction: Interaction):
     user_id, guild_id = get_user_and_guild_ids(interaction)
     user_id, guild_id = int(user_id), int(guild_id)
-    
+
     await interaction.response.defer(ephemeral=True)
 
     self.cursor.execute('SELECT * FROM anime_notify_list WHERE user_id = ? AND guild_id = ?', (user_id, guild_id))
@@ -105,12 +105,45 @@ class CheckNotifyListCog(commands.Cog):
       anime_name = anime[5]
       iso_air_time = anime[7]
       image = anime[8]
-      print(image)
-      
+
       embed = build_anime_notify_list_embed(anime_name, iso_air_time, image)
 
       await interaction.followup.send(embed=embed, ephemeral=True)
-      
+
+class NotifyAnimeAiredCog(commands.Cog):
+  def __init__(self, bot, cursor):
+    self.bot = bot
+    self.cursor = cursor
+    self.check_airing.start()
+
+  @tasks.loop(minutes=1)
+  async def check_airing(self):
+    self.cursor.execute('SELECT DISTINCT user_id, guild_id FROM anime_notify_list')
+    user_guild_pairs = self.cursor.fetchall()
+
+    for user_id, guild_id in user_guild_pairs:
+      anime_list = check_notify_list(user_id, guild_id, self.cursor)
+      animes_with_episode_aired = check_if_aired(anime_list)
+
+      guild = self.bot.get_guild(guild_id)
+      if not guild:
+        continue  
+
+      channel = next(
+        (ch for ch in guild.text_channels if ch.permissions_for(guild.me).send_messages),
+        None
+      )
+      if not channel:
+        continue 
+
+      for anime in animes_with_episode_aired:
+        embed = build_anime_airing_notification_embed(
+          anime_name=anime['anime_name'],
+          image_url=anime['image'],
+          user_id=anime['user_id']
+        )
+        await channel.send(content=f"<@{user_id}>", embed=embed)
+
 class CharacterSearchCog(commands.Cog):
   pass
 
@@ -119,3 +152,4 @@ async def setup(bot):
   await bot.add_cog(AllAnimeSearchCog(bot))
   await bot.add_cog(CharacterSearchCog(bot))
   await bot.add_cog(CheckNotifyListCog(bot, cursor))
+  await bot.add_cog(NotifyAnimeAiredCog(bot, cursor))

@@ -93,11 +93,22 @@ def build_anime_notify_list_embed(anime_name: str, iso_air_time: str, image: str
     formatted_time = iso_to_formatted_time(iso_air_time)
 
     embed = discord.Embed(
-        title=f'🎬 {anime_name}',
-        color=discord.Color.dark_blue()
+      title=f'🎬 {anime_name}',
+      color=discord.Color.dark_blue()
     )
     embed.add_field(name='Next episode in', value=formatted_time, inline=True)
-    embed.set_thumbnail(url=str(image))  # just pass string, no braces
+    embed.set_thumbnail(url=str(image))  
+
+    return embed
+
+def build_anime_airing_notification_embed(anime_name: str, image_url: str, user_id: str) -> discord.Embed:
+    embed = discord.Embed(
+        title=f'📢 New Episode Aired: {anime_name}',
+        description=f'<@{user_id}> A new episode just dropped — go check it out!',
+        color=discord.Color.dark_blue()
+    )
+    embed.set_thumbnail(url=image_url)
+    embed.set_footer(text="AniAlert • Real-time Anime Notifications")
 
     return embed
 

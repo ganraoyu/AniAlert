@@ -100,4 +100,4 @@ def get_seasonal_anime_info(page: int, results_shown: int) -> list:
 
 if __name__ == '__main__':
     example = get_full_anime_info('one piece', 5, 'TV')
-    print(json.dumps(example, indent=2, ensure_ascii=False))
+    print(json.dumps(example, indent=2, ensure_ascii=False))    
