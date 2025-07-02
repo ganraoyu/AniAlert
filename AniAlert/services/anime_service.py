@@ -37,7 +37,7 @@ def extract_episodes(anime: dict, nodes: dict, index: int) -> dict:
     return anime
 
 
-def get_full_anime_info(name: str, results_shown: int, media_type: str) -> list:
+def get_full_anime_info(name: str, results_shown: int = 1, media_type: str = 'all') -> list:
     results = search_kitsu_anime(name)
     anime_list = []
 

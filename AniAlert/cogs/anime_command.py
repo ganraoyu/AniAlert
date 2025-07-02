@@ -2,7 +2,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-from db.database import cursor
+from db.database import cursor, conn
 
 from typing import Optional
 
@@ -111,9 +111,10 @@ class CheckNotifyListCog(commands.Cog):
       await interaction.followup.send(embed=embed, ephemeral=True)
 
 class NotifyAnimeAiredCog(commands.Cog):
-  def __init__(self, bot, cursor):
+  def __init__(self, bot, cursor, conn):
     self.bot = bot
     self.cursor = cursor
+    self.conn = conn
     self.check_airing.start()
 
   @tasks.loop(minutes=1)
@@ -125,6 +126,9 @@ class NotifyAnimeAiredCog(commands.Cog):
       anime_list = check_notify_list(user_id, guild_id, self.cursor)
       animes_with_episode_aired = check_if_aired(anime_list)
 
+      if not animes_with_episode_aired:
+        continue 
+
       guild = self.bot.get_guild(guild_id)
       if not guild:
         continue  
@@ -135,14 +139,35 @@ class NotifyAnimeAiredCog(commands.Cog):
       )
       if not channel:
         continue 
-
+      
       for anime in animes_with_episode_aired:
+        new_anime = get_full_anime_info(anime['anime_name'])
+
+        anime_id = anime['anime_id']
+
         embed = build_anime_airing_notification_embed(
           anime_name=anime['anime_name'],
           image_url=anime['image'],
           user_id=anime['user_id']
         )
         await channel.send(content=f"<@{user_id}>", embed=embed)
+
+        if new_anime and new_anime[0].get('airingAt_unix'):
+          unix_air_time_value = new_anime[0]['airingAt_unix']
+          iso_air_time_value = new_anime[0].get('airingAt_iso')
+
+          self.cursor.execute(
+              'UPDATE anime_notify_list SET unix_air_time = ?, iso_air_time = ? WHERE id = ?',
+              (unix_air_time_value, iso_air_time_value, anime_id)
+          )
+        else:
+          self.cursor.execute('SELECT * FROM anime_notify_list WHERE id = ?', (anime_id,))
+          row = self.cursor.fetchone()
+
+          if row:
+            self.cursor.execute('DELETE FROM anime_notify_list WHERE id = ?', (anime_id,))
+            
+        self.conn.commit()      
 
 class CharacterSearchCog(commands.Cog):
   pass
@@ -152,4 +177,4 @@ async def setup(bot):
   await bot.add_cog(AllAnimeSearchCog(bot))
   await bot.add_cog(CharacterSearchCog(bot))
   await bot.add_cog(CheckNotifyListCog(bot, cursor))
-  await bot.add_cog(NotifyAnimeAiredCog(bot, cursor))
+  await bot.add_cog(NotifyAnimeAiredCog(bot, cursor, conn))
