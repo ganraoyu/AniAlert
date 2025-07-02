@@ -1,5 +1,7 @@
 import discord
 from typing import List, Tuple
+from utils.formatted_time import iso_to_formatted_time
+
 def get_anime_variables(anime: dict):
   title = anime.get('title', 'Unknown Title')
   synopsis = anime.get('synopsis', 'No synopsis available.')
@@ -87,14 +89,16 @@ def build_remove_anime_embed(anime: dict) -> discord.Embed:
 
   return embed
 
-def build_anime_notify_list_embed(anime_name: str, iso_air_time: str) -> dict:
+def build_anime_notify_list_embed(anime_name: str, iso_air_time: str, image: str) -> discord.Embed:
+    formatted_time = iso_to_formatted_time(iso_air_time)
 
-  embed = discord.Embed(
-    title=f'🎬 {anime_name}',
-    color=discord.Color.dark_blue()
-  )
-  # embed.add_field(name='Next episode', value=str(int(vars['episodes']) + 1))
-  embed.add_field(name='Next episode in', value={iso_air_time}, inline=True)
+    embed = discord.Embed(
+        title=f'🎬 {anime_name}',
+        color=discord.Color.dark_blue()
+    )
+    embed.add_field(name='Next episode in', value=formatted_time, inline=True)
+    embed.set_thumbnail(url=str(image))  # just pass string, no braces
 
-  return embed
+    return embed
+
 

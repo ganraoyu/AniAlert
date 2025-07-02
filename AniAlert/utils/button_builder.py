@@ -22,6 +22,7 @@ class CombinedAnimeButtonView(discord.ui.View):
     anime_name = self.anime['title']
     unix_air_time = self.anime['airingAt_unix']
     iso_air_time = self.anime['airingAt_iso']
+    image = self.anime['image']
 
     cursor.execute(
       "SELECT 1 FROM anime_notify_list WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?",
@@ -36,8 +37,8 @@ class CombinedAnimeButtonView(discord.ui.View):
       return
 
     cursor.execute(
-      "INSERT INTO anime_notify_list (guild_id, guild_name, user_id, user_name, anime_name, unix_air_time, iso_air_time) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      (guild_id, guild_name, user_id, user_name, anime_name, unix_air_time, iso_air_time)
+      "INSERT INTO anime_notify_list (guild_id, guild_name, user_id, user_name, anime_name, unix_air_time, iso_air_time, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      (guild_id, guild_name, user_id, user_name, anime_name, unix_air_time, iso_air_time, image)
     )
 
     embed = build_add_anime_embed(self.anime)

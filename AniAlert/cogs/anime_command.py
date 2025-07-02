@@ -85,8 +85,6 @@ class AllAnimeSearchCog(commands.Cog):
       
       await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
-class CharacterSearchCog(commands.Cog):
-  pass
 
 class CheckNotifyListCog(commands.Cog):
   def __init__(self, bot, cursor):
@@ -106,17 +104,16 @@ class CheckNotifyListCog(commands.Cog):
     for anime in results:
       anime_name = anime[5]
       iso_air_time = anime[7]
+      image = anime[8]
+      print(image)
       
-      embed = build_anime_notify_list_embed(anime_name, iso_air_time)
+      embed = build_anime_notify_list_embed(anime_name, iso_air_time, image)
 
       await interaction.followup.send(embed=embed, ephemeral=True)
-
-        
-
       
+class CharacterSearchCog(commands.Cog):
+  pass
 
-
-    
 async def setup(bot):
   await bot.add_cog(SeasonalAnimeLookUpCog(bot))
   await bot.add_cog(AllAnimeSearchCog(bot))
