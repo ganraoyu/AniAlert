@@ -21,7 +21,7 @@ async def on_ready():
     print("Syncing application commands...")
     await bot.tree.sync()
     print("Application commands synced successfully!")
-    
+      
   except Exception as e:
     print(f"Failed to load anime_command cog: {e}")
 

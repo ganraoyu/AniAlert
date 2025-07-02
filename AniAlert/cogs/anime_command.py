@@ -2,7 +2,7 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-from db.database import cursor, conn
+from db.database import cursor
 
 from typing import Optional
 
@@ -14,6 +14,8 @@ from services.anime_service import get_seasonal_anime_info
 
 from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_seasonal_anime_embed
+from utils.embed_builder import build_anime_notify_list_embed
+from utils.interaction_helper import get_user_and_guild_ids
 
 from utils.button_builder import anime_buttons_view
 
@@ -87,12 +89,29 @@ class CharacterSearchCog(commands.Cog):
   pass
 
 class CheckNotifyListCog(commands.Cog):
-  def __init__(self, bot):
+  def __init__(self, bot, cursor):
     self.bot = bot
+    self.cursor = cursor
 
-    @app_commands.command(name='list', description='Check notify list')
-    async def check_notify_list(self, interaction: Interaction):
-      cursor.execute('SELECT * FROM anime_notify_list')
+  @app_commands.command(name='list', description='Check notify list')
+  async def check_notify_list(self, interaction: Interaction):
+    user_id, guild_id = get_user_and_guild_ids(interaction)
+    user_id, guild_id = int(user_id), int(guild_id)
+    
+    await interaction.response.defer(ephemeral=True)
+
+    self.cursor.execute('SELECT * FROM anime_notify_list WHERE user_id = ? AND guild_id = ?', (user_id, guild_id))
+    results = self.cursor.fetchall()
+
+    for anime in results:
+      anime_name = anime[5]
+      iso_air_time = anime[7]
+      
+      embed = build_anime_notify_list_embed(anime_name, iso_air_time)
+
+      await interaction.followup.send(embed=embed, ephemeral=True)
+
+        
 
       
 
@@ -102,3 +121,4 @@ async def setup(bot):
   await bot.add_cog(SeasonalAnimeLookUpCog(bot))
   await bot.add_cog(AllAnimeSearchCog(bot))
   await bot.add_cog(CharacterSearchCog(bot))
+  await bot.add_cog(CheckNotifyListCog(bot, cursor))

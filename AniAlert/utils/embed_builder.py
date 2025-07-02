@@ -1,5 +1,5 @@
 import discord
-
+from typing import List, Tuple
 def get_anime_variables(anime: dict):
   title = anime.get('title', 'Unknown Title')
   synopsis = anime.get('synopsis', 'No synopsis available.')
@@ -87,17 +87,14 @@ def build_remove_anime_embed(anime: dict) -> discord.Embed:
 
   return embed
 
-def build_anime_notify_list_embed(anime: dict) -> dict:
-  vars = get_anime_variables(anime)
+def build_anime_notify_list_embed(anime_name: str, iso_air_time: str) -> dict:
 
   embed = discord.Embed(
-    title=f'🎬 {vars["title"]}',
+    title=f'🎬 {anime_name}',
     color=discord.Color.dark_blue()
   )
-  embed.add_field(name='Next episode', value=str(int(vars['episodes']) + 1))
-  embed.add_field(name='Next episode in', value=vars['time_until'], inline=True)
-
-  if vars['image']:
-    embed.set_thumbnail(url=vars['image'])
+  # embed.add_field(name='Next episode', value=str(int(vars['episodes']) + 1))
+  embed.add_field(name='Next episode in', value={iso_air_time}, inline=True)
 
   return embed
+

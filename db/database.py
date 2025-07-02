@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS anime_notify_list (
   user_id INTEGER NOT NULL,
   user_name TEXT NOT NULL,
   anime_name TEXT NOT NULL,
-  unix_air_time INTEGAR,
-  iso_air_time TEXT TEXT
+  unix_air_time INTEGER,
+  iso_air_time TEXT
 )
 """)
 

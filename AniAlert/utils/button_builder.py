@@ -28,7 +28,7 @@ class CombinedAnimeButtonView(discord.ui.View):
       (guild_id, guild_name, user_id, user_name, anime_name)
     )
 
-    if cursor.fetchone():
+    if cursor.fetchone(): 
       await interaction.response.send_message(
         f"⚠️ **{anime_name}** is already in your notify list.",
         ephemeral=True
