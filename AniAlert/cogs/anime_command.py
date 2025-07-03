@@ -17,6 +17,8 @@ from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_seasonal_anime_embed
 from utils.embed_builder import build_anime_notify_list_embed
 from utils.embed_builder import build_anime_airing_notification_embed
+from utils.embed_builder import build_remove_anime_embed
+
 from utils.interaction_helper import get_user_and_guild_ids
 from utils.button_builder import anime_buttons_view
 
@@ -33,7 +35,7 @@ class SeasonalAnimeLookUpCog(commands.Cog):
   @app_commands.command(name='seasonal_anime', description='Look up currently airing seasonal anime')
   async def seasonal_anime_slash(self, interaction: Interaction, page: int, results_shown: int):
     await interaction.response.defer(ephemeral=True)
-    
+
     animes = get_seasonal_anime_info(page, results_shown)
 
     if not animes:
@@ -88,6 +90,49 @@ class AllAnimeSearchCog(commands.Cog):
 
       await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
+class RemoveAnimeCog(commands.Cog):
+  def __init__(self, bot, cursor, conn):
+    self.bot = bot
+    self.cursor = cursor
+    self.conn = conn
+
+  @app_commands.command(name='remove_anime', description='Remove animes from notify list')
+  @app_commands.describe(
+    id='Enter anime ID to remove'
+  )
+  async def remove_anime(self, interaction: Interaction, id: int):
+    await interaction.response.defer(ephemeral=True)
+    
+    self.cursor.execute('SELECT * FROM anime_notify_list WHERE id = ?', (id,))
+    result = self.cursor.fetchone()
+
+    if result:
+      anime_dict = {
+        'id': result[0],
+        'guild_id': result[1],
+        'guild_name': result[2],
+        'user_id': result[3],
+        'user_name': result[4],
+        'title': result[5],
+        'episode': result[6],
+        'unix_air_time': result[7],
+        'iso_air_time': result[8],
+        'image': result[9]
+      }
+
+      embed = build_remove_anime_embed(anime_dict)
+
+      self.cursor.execute('DELETE FROM anime_notify_list WHERE id = ?', (id,))
+
+      await interaction.followup.send(embed=embed, ephemeral=True)
+    else:
+      await interaction.response.send_message(
+        f"⚠️ No anime found with ID `{id}`.",
+        ephemeral=True
+      )
+
+    self.conn.commit()
+        
 class CheckNotifyListCog(commands.Cog):
   def __init__(self, bot, cursor):
     self.bot = bot
@@ -105,12 +150,13 @@ class CheckNotifyListCog(commands.Cog):
 
     embeds = []
     for anime in results:
+      id = anime[0]
       anime_name = anime[5]   
       episode = anime[6]          
       iso_air_time = anime[8]     
       image = anime[9]             
 
-      embed = build_anime_notify_list_embed(anime_name, episode, iso_air_time, image)
+      embed = build_anime_notify_list_embed(anime_name, id, episode, iso_air_time, image)
       embeds.append(embed)
 
     await interaction.followup.send(embeds=embeds, ephemeral=True)
@@ -183,3 +229,4 @@ async def setup(bot):
   await bot.add_cog(CharacterSearchCog(bot))
   await bot.add_cog(CheckNotifyListCog(bot, cursor))
   await bot.add_cog(NotifyAnimeAiredCog(bot, cursor, conn))
+  await bot.add_cog(RemoveAnimeCog(bot, cursor, conn))

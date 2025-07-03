@@ -90,11 +90,11 @@ def build_remove_anime_embed(anime: dict) -> discord.Embed:
 
   return embed
 
-def build_anime_notify_list_embed(anime_name: str, episode: int, iso_air_time: str, image: str) -> discord.Embed:
+def build_anime_notify_list_embed(anime_name: str, id: int, episode: int, iso_air_time: str, image: str) -> discord.Embed:
     formatted_time = convert_iso(iso_air_time)  
 
     embed = discord.Embed(
-      title=f'🎬 {anime_name}',
+      title=f'🎬 {anime_name} (ID: {id})',
       color=discord.Color.dark_blue()
     )
     # No plus 1 episode here. This is pulled straight from the data base.
