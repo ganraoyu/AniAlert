@@ -23,7 +23,7 @@ class CombinedAnimeButtonView(discord.ui.View):
     unix_air_time = self.anime['airingAt_unix']
     iso_air_time = self.anime['airingAt_iso']
     image = self.anime['image']
-    episode = int(self.anime.get('episodes')) + 1  # Default to 1 if missing
+    episode = int(self.anime.get('episodes')) + 1 
 
     cursor.execute(
       "SELECT 1 FROM anime_notify_list WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?",

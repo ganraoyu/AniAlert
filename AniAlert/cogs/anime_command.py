@@ -26,14 +26,14 @@ from views.pick_anime_view import PickAnimeView
 # Searches - Require user input
 # Look ups - No user input, just returns data
 
-class SeasonalAnimeLookUpCog(commands.Cog):
+class SeasonalAnimeLookUpCog(commands.Cog): 
   def __init__(self, bot):
     self.bot = bot
 
   @app_commands.command(name='seasonal_anime', description='Look up currently airing seasonal anime')
   async def seasonal_anime_slash(self, interaction: Interaction, page: int, results_shown: int):
-    await interaction.response.send_message("Look up Seasonal Anime (Popularity).", ephemeral=True)
-
+    await interaction.response.defer(ephemeral=True)
+    
     animes = get_seasonal_anime_info(page, results_shown)
 
     if not animes:
@@ -42,7 +42,9 @@ class SeasonalAnimeLookUpCog(commands.Cog):
 
     for anime in animes:
       embed = build_seasonal_anime_embed(anime)
-      await interaction.followup.send(embed=embed, ephemeral=True)
+      buttons = anime_buttons_view(anime)
+
+      await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
 class AllAnimeSearchCog(commands.Cog):
   def __init__(self, bot):

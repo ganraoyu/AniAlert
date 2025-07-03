@@ -1,6 +1,7 @@
 import requests
 import json
 from datetime import datetime
+from utils.time_converter import convert_unix
 
 query = '''
 query($search: String){
@@ -31,17 +32,6 @@ query($search: String){
 }
 '''
 
-def break_down_time(unix_time):
-  
-  days = unix_time // 86400
-  hours = (unix_time % 86400) // 3600
-  minutes = (unix_time % 3600) // 60
-  seconds = unix_time % 60
-
-  time = f'{days}d {hours}h {minutes}m {seconds}s'
-
-  return time
-
 def search_anime_anilist(search):
     response = requests.post(
         'https://graphql.anilist.co',
@@ -54,7 +44,7 @@ def search_anime_anilist(search):
     for episode in nodes:
         episode['airingAt_unix'] = episode['airingAt']
         episode['airingAt'] = datetime.utcfromtimestamp(episode['airingAt']).isoformat()
-        episode['timeUntilAiring'] = break_down_time(episode['timeUntilAiring'])
+        episode['timeUntilAiring'] = convert_unix(episode['timeUntilAiring'])
 
     return data
 

@@ -1,6 +1,6 @@
 import discord
 from typing import List, Tuple
-from utils.formatted_time import iso_to_formatted_time
+from utils.time_converter import convert_iso
 
 def get_anime_variables(anime: dict):
   title = anime.get('title', 'Unknown Title')
@@ -12,7 +12,7 @@ def get_anime_variables(anime: dict):
   ranking = str(anime.get('ranking', 'N/A'))
   genres = str(anime.get('genres', [])) or 'Unknown'
   image = anime.get('image')
-  time_until = str(anime.get('timeUntilAiring', 'N/A'))
+  timeUntilAiring = str(anime.get('timeUntilAiring', 'N/A'))
   airing_at = str(anime.get('airingAt_iso', 'N/A'))
 
   return {
@@ -25,7 +25,7 @@ def get_anime_variables(anime: dict):
     'ranking': ranking,
     'genres': genres,
     'image': image,
-    'time_until': time_until,
+    'timeUntilAiring': timeUntilAiring,
     'airing_at': airing_at
   }
 
@@ -70,7 +70,9 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
     title=f'🎬 {vars["title"]}',
     color=discord.Color.green()
   )
-  embed.add_field(name=f'Episode {vars['episodes']} in', value=vars['time_until'], inline=False)
+
+  # Anilist only pulls current episodes, need a plus 1 to show the next airing episode
+  embed.add_field(name=f"Episode {int(vars['episodes']) + 1} in", value=vars['timeUntilAiring'], inline=False)
   embed.add_field(name='Airing at', value=vars['airing_at'], inline=False)
 
   if vars['image']:
@@ -89,13 +91,14 @@ def build_remove_anime_embed(anime: dict) -> discord.Embed:
   return embed
 
 def build_anime_notify_list_embed(anime_name: str, episode: int, iso_air_time: str, image: str) -> discord.Embed:
-    formatted_time = iso_to_formatted_time(iso_air_time)
+    formatted_time = convert_iso(iso_air_time)  
 
     embed = discord.Embed(
       title=f'🎬 {anime_name}',
       color=discord.Color.dark_blue()
     )
-    embed.add_field(name=f'Episode {episode} in', value=formatted_time, inline=True)
+    # No plus 1 episode here. This is pulled straight from the data base.
+    embed.add_field(name=f'Episode {episode} in', value=formatted_time, inline=False)
     embed.set_thumbnail(url=str(image))  
 
     return embed
