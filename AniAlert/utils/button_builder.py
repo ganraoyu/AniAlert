@@ -23,13 +23,14 @@ class CombinedAnimeButtonView(discord.ui.View):
     unix_air_time = self.anime['airingAt_unix']
     iso_air_time = self.anime['airingAt_iso']
     image = self.anime['image']
+    episode = int(self.anime.get('episodes')) + 1  # Default to 1 if missing
 
     cursor.execute(
       "SELECT 1 FROM anime_notify_list WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?",
       (guild_id, guild_name, user_id, user_name, anime_name)
     )
 
-    if cursor.fetchone(): 
+    if cursor.fetchone():
       await interaction.response.send_message(
         f"⚠️ **{anime_name}** is already in your notify list.",
         ephemeral=True
@@ -37,8 +38,14 @@ class CombinedAnimeButtonView(discord.ui.View):
       return
 
     cursor.execute(
-      "INSERT INTO anime_notify_list (guild_id, guild_name, user_id, user_name, anime_name, unix_air_time, iso_air_time, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      (guild_id, guild_name, user_id, user_name, anime_name, unix_air_time, iso_air_time, image)
+      """
+      INSERT INTO anime_notify_list (
+        guild_id, guild_name, user_id, user_name,
+        anime_name, episode, unix_air_time, iso_air_time, image
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      """,
+      (guild_id, guild_name, user_id, user_name,
+       anime_name, episode, unix_air_time, iso_air_time, image)
     )
 
     embed = build_add_anime_embed(self.anime)

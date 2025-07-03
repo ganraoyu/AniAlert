@@ -101,14 +101,17 @@ class CheckNotifyListCog(commands.Cog):
     self.cursor.execute('SELECT * FROM anime_notify_list WHERE user_id = ? AND guild_id = ?', (user_id, guild_id))
     results = self.cursor.fetchall()
 
+    embeds = []
     for anime in results:
-      anime_name = anime[5]
-      iso_air_time = anime[7]
-      image = anime[8]
+      anime_name = anime[5]   
+      episode = anime[6]          
+      iso_air_time = anime[8]     
+      image = anime[9]             
 
-      embed = build_anime_notify_list_embed(anime_name, iso_air_time, image)
+      embed = build_anime_notify_list_embed(anime_name, episode, iso_air_time, image)
+      embeds.append(embed)
 
-      await interaction.followup.send(embed=embed, ephemeral=True)
+    await interaction.followup.send(embeds=embeds, ephemeral=True)
 
 class NotifyAnimeAiredCog(commands.Cog):
   def __init__(self, bot, cursor, conn):

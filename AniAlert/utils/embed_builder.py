@@ -13,7 +13,7 @@ def get_anime_variables(anime: dict):
   genres = str(anime.get('genres', [])) or 'Unknown'
   image = anime.get('image')
   time_until = str(anime.get('timeUntilAiring', 'N/A'))
-  airing_at = str(anime.get('airingAt', 'N/A'))
+  airing_at = str(anime.get('airingAt_iso', 'N/A'))
 
   return {
     'title': title,
@@ -70,9 +70,8 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
     title=f'🎬 {vars["title"]}',
     color=discord.Color.green()
   )
-  embed.add_field(name='Next episode', value=str(int(vars['episodes']) + 1))
-  embed.add_field(name='Next episode in', value=vars['time_until'], inline=True)
-  embed.add_field(name='Airing at', value=vars['airing_at'], inline=True)
+  embed.add_field(name=f'Episode {vars['episodes']} in', value=vars['time_until'], inline=False)
+  embed.add_field(name='Airing at', value=vars['airing_at'], inline=False)
 
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
@@ -89,14 +88,14 @@ def build_remove_anime_embed(anime: dict) -> discord.Embed:
 
   return embed
 
-def build_anime_notify_list_embed(anime_name: str, iso_air_time: str, image: str) -> discord.Embed:
+def build_anime_notify_list_embed(anime_name: str, episode: int, iso_air_time: str, image: str) -> discord.Embed:
     formatted_time = iso_to_formatted_time(iso_air_time)
 
     embed = discord.Embed(
       title=f'🎬 {anime_name}',
       color=discord.Color.dark_blue()
     )
-    embed.add_field(name='Next episode in', value=formatted_time, inline=True)
+    embed.add_field(name=f'Episode {episode} in', value=formatted_time, inline=True)
     embed.set_thumbnail(url=str(image))  
 
     return embed

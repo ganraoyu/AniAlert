@@ -13,14 +13,16 @@ def check_notify_list(user_id: str, guild_id: str, cursor):
   for anime in results:
     anime_id = anime[0]
     user_id = anime[3]
-    anime_name = anime[5]
-    iso_air_time = anime[7]
-    image = anime[8]
+    anime_name = anime[5]         
+    episode = anime[6]           
+    iso_air_time = anime[8]       
+    image = anime[9]            
 
     anime_list.append({
     "anime_id": anime_id,
     "user_id": user_id,
     "anime_name": anime_name,
+    "episode": episode,
     "iso_air_time": iso_air_time,
     "image": image
     })
