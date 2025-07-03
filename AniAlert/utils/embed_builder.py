@@ -97,6 +97,7 @@ def build_anime_notify_list_embed(anime_name: str, id: int, episode: int, iso_ai
       title=f'🎬 {anime_name} (ID: {id})',
       color=discord.Color.dark_blue()
     )
+    
     # No plus 1 episode here. This is pulled straight from the data base.
     embed.add_field(name=f'Episode {episode} in', value=formatted_time, inline=False)
     embed.set_thumbnail(url=str(image))  

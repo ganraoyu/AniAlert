@@ -19,12 +19,20 @@ class CombinedAnimeButtonView(discord.ui.View):
     guild_name = str(interaction.guild.name)
     user_id = str(interaction.user.id)
     user_name = str(interaction.user.name)
-    anime_name = self.anime['title']
-    unix_air_time = self.anime['airingAt_unix']
-    iso_air_time = self.anime['airingAt_iso']
-    image = self.anime['image']
-    episode = int(self.anime.get('episodes')) + 1 
 
+    anime_name = self.anime.get('title', 'Unknown Title')
+    unix_air_time = self.anime.get('airingAt_unix', 0)
+    iso_air_time = self.anime.get('airingAt_iso', '1970-01-01T00:00:00')
+    image = self.anime.get('image', '')
+    episode = int(self.anime.get('episodes', 0)) + 1
+
+    if unix_air_time == 0 or iso_air_time == '1970-01-01T00:00:00':
+      await interaction.response.send_message(
+          f"⚠️ **{anime_name}** has finished airing and has no more upcoming episodes.",
+          ephemeral=True
+      )
+      return
+    
     cursor.execute(
       "SELECT 1 FROM anime_notify_list WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?",
       (guild_id, guild_name, user_id, user_name, anime_name)
@@ -52,7 +60,7 @@ class CombinedAnimeButtonView(discord.ui.View):
     conn.commit()
 
     await interaction.response.send_message(
-      content=f"✅ **{anime_name}** added to your watchlist. (User: {user_name})",
+      content=f"✅ **{anime_name}** added to your watchlist.)",
       embed=embed,
       ephemeral=True
     )
@@ -86,7 +94,7 @@ class CombinedAnimeButtonView(discord.ui.View):
     embed = build_remove_anime_embed(self.anime)
 
     await interaction.response.send_message(
-      f"✅ **{anime_name}** removed from your watchlist. (User: {user_name})",
+      f"✅ **{anime_name}** removed from your watchlist.",
       embed=embed,
       ephemeral=True
     )

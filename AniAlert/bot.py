@@ -15,15 +15,15 @@ bot = commands.Bot(command_prefix="$", intents=intents)
 async def on_ready():
   print(f"Logged in as {bot.user}!")
   try:
-    await bot.load_extension("cogs.anime_command")
-    print("Successfully loaded anime_command cog!") 
+    await bot.load_extension("cogs.commands")
+    print("Successfully loaded commands cog!") 
     
     print("Syncing application commands...")
     await bot.tree.sync()
     print("Application commands synced successfully!")
       
   except Exception as e:
-    print(f"Failed to load anime_command cog: {e}")
+    print(f"Failed to load commands cog: {e}")
 
 @bot.event
 async def on_command_error(context, error):
