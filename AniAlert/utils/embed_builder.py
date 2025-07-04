@@ -47,6 +47,7 @@ def build_search_anime_embed(anime: dict) -> discord.Embed:
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
 
+  embed.set_footer(text="AniAlert • Search Results")
   return embed
 
 def build_seasonal_anime_embed(anime: dict) -> discord.Embed:
@@ -61,6 +62,7 @@ def build_seasonal_anime_embed(anime: dict) -> discord.Embed:
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
 
+  embed.set_footer(text="AniAlert • Seasonal Anime")
   return embed
 
 def build_add_anime_embed(anime: dict) -> discord.Embed:
@@ -71,13 +73,13 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
     color=discord.Color.green()
   )
 
-  # Anilist only pulls current episodes, need a plus 1 to show the next airing episode
   embed.add_field(name=f"Episode {int(vars['episodes']) + 1} in", value=vars['timeUntilAiring'], inline=False)
   embed.add_field(name='Airing at', value=vars['airing_at'], inline=False)
 
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
 
+  embed.set_footer(text="AniAlert • Anime Added")
   return embed
 
 def build_remove_anime_embed(anime: dict) -> discord.Embed:
@@ -88,32 +90,31 @@ def build_remove_anime_embed(anime: dict) -> discord.Embed:
     color=discord.Color.red()
   )
 
+  embed.set_footer(text="AniAlert • Anime Removed")
   return embed
 
 def build_anime_notify_list_embed(anime_name: str, id: int, episode: int, iso_air_time: str, image: str) -> discord.Embed:
-    formatted_time = convert_iso(iso_air_time)  
+  formatted_time = convert_iso(iso_air_time)  
 
-    embed = discord.Embed(
-      title=f'🎬 {anime_name} (ID: {id})',
-      color=discord.Color.dark_blue()
-    )
-    
-    # No plus 1 episode here. This is pulled straight from the data base.
-    embed.add_field(name=f'Episode {episode} in', value=formatted_time, inline=False)
-    embed.set_thumbnail(url=str(image))  
-
-    return embed
+  embed = discord.Embed(
+    title=f'🎬 {anime_name} (ID: {id})',
+    color=discord.Color.dark_blue()
+  )
+  
+  embed.add_field(name=f'Episode {episode} in', value=formatted_time, inline=False)
+  embed.set_thumbnail(url=str(image))  
+  embed.set_footer(text="AniAlert • Notification List")
+  return embed
 
 def build_anime_airing_notification_embed(anime_name: str, image_url: str, user_id: str) -> discord.Embed:
-    embed = discord.Embed(
-        title=f'📢 New Episode Aired: {anime_name}',
-        description=f'<@{user_id}> A new episode just dropped — go check it out!',
-        color=discord.Color.dark_blue()
-    )
-    embed.set_thumbnail(url=image_url)
-    embed.set_footer(text="AniAlert • Real-time Anime Notifications")
-
-    return embed
+  embed = discord.Embed(
+    title=f'📢 New Episode Aired: {anime_name}',
+    description=f'<@{user_id}> A new episode just dropped — go check it out!',
+    color=discord.Color.dark_blue()
+  )
+  embed.set_thumbnail(url=image_url)
+  embed.set_footer(text="AniAlert • Airing Notification")
+  return embed
 
 def build_random_anime_embed(anime: dict):
   vars = get_anime_variables(anime)
@@ -131,7 +132,4 @@ def build_random_anime_embed(anime: dict):
     embed.set_thumbnail(url=vars['image'])
 
   embed.set_footer(text="AniAlert • Random Anime Generator")
-
   return embed
-
-

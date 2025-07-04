@@ -32,13 +32,17 @@ def get_random_anime(genres: list[str]) -> dict:
     return {}
 
   anime = media[0]
-  
+  genres = ", ".join(anime.get("genres", [])) 
+  synopsis = anime.get("description", "")
+  for tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>']:
+      synopsis = synopsis.replace(tag, '')
+
   flattened = {
     "title": anime["title"].get("english"),
     "image": anime["coverImage"].get("extraLarge"),
-    "synopsis": anime.get("description"),
+    "synopsis": synopsis,
     "episodes": anime.get("episodes"),
-    "genres": anime.get("genres")
+    "genres": genres 
   }
 
   return flattened
