@@ -10,6 +10,7 @@ from discord import app_commands, Interaction
 
 from services.anime_service import get_full_anime_info
 from services.anime_service import get_seasonal_anime_info
+from services.anime_service import get_random_anime_suggestion
 from services.airing_checker import check_notify_list, check_if_aired 
 
 from utils.embed_builder import build_search_anime_embed
@@ -17,6 +18,7 @@ from utils.embed_builder import build_seasonal_anime_embed
 from utils.embed_builder import build_anime_notify_list_embed
 from utils.embed_builder import build_anime_airing_notification_embed
 from utils.embed_builder import build_remove_anime_embed
+from utils.embed_builder import build_random_anime_embed
 
 from utils.interaction_helper import get_user_and_guild_ids
 from utils.button_builder import anime_buttons_view
@@ -300,6 +302,25 @@ class ClearNotifyListCog(commands.Cog):
 class CharacterSearchCog(commands.Cog):
   pass
 
+class RandomAnimeCog(commands.Cog):
+  def __init__(self, bot):
+    self.bot = bot
+  
+  @app_commands.command(name='random_anime_suggestion', description='Get a random anime ' \
+  'based on genre')
+  @app_commands.describe(genres='Enter genres separated by commas (e.g. Action,Adventure)')
+  async def random(self, interaction: Interaction, genres: str):
+    await interaction.response.defer()
+
+    genre_list = [g.strip() for g in genres.split(',') if g.strip()]
+
+    anime = get_random_anime_suggestion(genre_list)
+
+    embed = build_random_anime_embed(anime)
+
+    await interaction.followup.send(embed=embed, ephemeral=True)
+
+
 async def setup(bot):
   await bot.add_cog(SeasonalAnimeLookUpCog(bot))
   await bot.add_cog(AllAnimeSearchCog(bot))
@@ -308,3 +329,4 @@ async def setup(bot):
   await bot.add_cog(NotifyAnimeAiredCog(bot, cursor, conn))
   await bot.add_cog(RemoveAnimeCog(bot, cursor, conn))
   await bot.add_cog(ClearNotifyListCog(bot, cursor, conn))
+  await bot.add_cog(RandomAnimeCog(bot))

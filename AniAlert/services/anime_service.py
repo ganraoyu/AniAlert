@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from providers.anilist.search import search_anime_anilist
 from providers.anilist.seasonal import get_seasonal_animes_anilist
+from providers.anilist.randomize import get_random_anime
 from providers import search_kitsu_anime
 
 
@@ -97,6 +98,9 @@ def get_seasonal_anime_info(page: int, results_shown: int) -> list:
     results = get_seasonal_animes_anilist(page, results_shown)
     return results
 
+def get_random_anime_suggestion(genres: list[str]) -> list:
+    results = get_random_anime(genres)
+    return results
 
 if __name__ == '__main__':
     example = get_full_anime_info('one piece', 5, 'TV')

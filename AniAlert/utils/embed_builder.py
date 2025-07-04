@@ -115,4 +115,23 @@ def build_anime_airing_notification_embed(anime_name: str, image_url: str, user_
 
     return embed
 
+def build_random_anime_embed(anime: dict):
+  vars = get_anime_variables(anime)
+  
+  embed = discord.Embed(
+    title=f'🎲 Random Anime: {vars["title"]}',
+    description=vars['synopsis'],
+    color=discord.Color.random()
+  )
+
+  embed.add_field(name='🎞️ Episodes', value=vars['episodes'], inline=True)
+  embed.add_field(name='🎭 Genres', value=vars['genres'], inline=True)
+
+  if vars['image']:
+    embed.set_thumbnail(url=vars['image'])
+
+  embed.set_footer(text="AniAlert • Random Anime Generator")
+
+  return embed
+
 
