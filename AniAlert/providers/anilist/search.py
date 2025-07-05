@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from utils.time_converter import convert_unix
 
+
 query = '''
 query($search: String){
   Media(search: $search, type: ANIME){
@@ -39,6 +40,7 @@ def search_anime_anilist(search):
     )
     data = response.json()
 
+
     nodes = data['data']['Media']['airingSchedule']['nodes']
 
     for episode in nodes:
@@ -49,5 +51,5 @@ def search_anime_anilist(search):
     return data
 
 if __name__ == '__main__':
-    response = search_anime_anilist('DAndadon season 2"')
+    response = search_anime_anilist('One Piece')
     print(json.dumps(response, indent=2, ensure_ascii=False))

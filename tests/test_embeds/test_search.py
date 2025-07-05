@@ -9,7 +9,7 @@ def get_dummy_anime(**overrides):
     'show_type': 'TV',
     'average_rating': 8.7,
     'episodes': 220,
-    'airing': '2002-2007',
+    'airing': True,
     'ranking': 1,
     'genres': ['Action', 'Adventure'],
     'image': 'http://example.com/image.png',
@@ -28,11 +28,15 @@ def test_search_anime_embed_all_fields_correct():
   assert embed.thumbnail.url == dummy['image']
   assert embed.footer.text == "AniAlert • Search Results"
 
-  field_map = {f.name: f.value for f in embed.fields}
+  field_map = {}
+  for field in embed.fields:
+    name = field.name
+    value = field.value
+    field_map[name] = value
   assert field_map['📺 Type'] == 'TV'
   assert field_map['⭐ Rating'] == '8.7'
   assert field_map['🎞️ Episodes'] == '220'
-  assert field_map['🗓️ Airing'] == '2002-2007'
+  assert field_map['🗓️ Airing'] == 'True'
   assert field_map['🏆 Rank'] == '1'
   assert field_map['🎭 Genres'] == "['Action', 'Adventure']"
 
@@ -41,7 +45,7 @@ test_data = [
   ('synopsis', 'No synopsis available.', 'description'),
   ('show_type', 'N/A', '📺 Type'),
   ('average_rating', 'N/A', '⭐ Rating'),
-  ('episodes', 'N/A', '🎞️ Episodes'),
+  ('episodes', '0', '🎞️ Episodes'),
   ('airing', 'N/A', '🗓️ Airing'),
   ('ranking', 'N/A', '🏆 Rank'),
   ('genres', 'Unknown', '🎭 Genres'),

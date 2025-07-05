@@ -7,12 +7,12 @@ def get_anime_variables(anime: dict):
   synopsis = anime.get('synopsis') or 'No synopsis available.'
   show_type = str(anime.get('show_type') or 'N/A')
   rating = str(anime.get('average_rating') or 'N/A')
-  episodes = str(anime.get('episodes') or 'N/A')
+  episodes = str(anime.get('episodes') or 0)
   airing = str(anime.get('airing') or 'N/A')
   ranking = str(anime.get('ranking') or 'N/A')
   genres = str(anime.get('genres') or 'Unknown')
   image = anime.get('image')
-  timeUntilAiring = str(anime.get('timeUntilAiring') or 'N/A')
+  time_until_airing = str(anime.get('time_until_airing') or 'N/A')
   airing_at = str(anime.get('airingAt_iso') or 'N/A')
 
   return {
@@ -25,7 +25,7 @@ def get_anime_variables(anime: dict):
     'ranking': ranking,
     'genres': genres,
     'image': image,
-    'timeUntilAiring': timeUntilAiring,
+    'time_until_airing': time_until_airing,
     'airing_at': airing_at
   }
 

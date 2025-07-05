@@ -59,3 +59,6 @@ def convert_iso(iso_time: str) -> str:
         parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
 
     return "in " + " ".join(parts) if parts else "soon"
+
+example = convert_unix(424824)
+print(example)
