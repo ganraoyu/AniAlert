@@ -79,7 +79,7 @@ def get_seasonal_animes_anilist(page: int, perPage: int):
 
         airingAt_unix = airing_info.get('airingAt')
         airingAt_iso = None
-        timeUntilAiring = convert_unix(airing_info.get('timeUntilAiring'))
+        time_until_airing = convert_unix(airing_info.get('timeUntilAiring'))
         episodes = airing_info.get('episode')
 
         if airingAt_unix:
@@ -97,7 +97,7 @@ def get_seasonal_animes_anilist(page: int, perPage: int):
             'image': image,
             'airingAt_unix': airingAt_unix,
             'airingAt_iso': airingAt_iso,
-            'timeUntilAiring': timeUntilAiring,
+            'time_until_airing': time_until_airing,
             'episodes': episodes
         })
 

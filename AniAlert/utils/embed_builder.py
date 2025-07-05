@@ -1,19 +1,19 @@
 import discord
 from typing import List, Tuple
-from utils.time_converter import convert_iso
+from .time_converter import convert_iso
 
 def get_anime_variables(anime: dict):
-  title = anime.get('title', 'Unknown Title')
-  synopsis = anime.get('synopsis', 'No synopsis available.')
-  show_type = str(anime.get('show_type', 'N/A'))
-  rating = str(anime.get('average_rating', 'N/A'))
-  episodes = str(anime.get('episodes', 'N/A'))
-  airing = str(anime.get('airing', 'N/A'))
-  ranking = str(anime.get('ranking', 'N/A'))
-  genres = str(anime.get('genres', [])) or 'Unknown'
+  title = anime.get('title') or 'Unknown Title'
+  synopsis = anime.get('synopsis') or 'No synopsis available.'
+  show_type = str(anime.get('show_type') or 'N/A')
+  rating = str(anime.get('average_rating') or 'N/A')
+  episodes = str(anime.get('episodes') or 'N/A')
+  airing = str(anime.get('airing') or 'N/A')
+  ranking = str(anime.get('ranking') or 'N/A')
+  genres = str(anime.get('genres') or 'Unknown')
   image = anime.get('image')
-  timeUntilAiring = str(anime.get('timeUntilAiring', 'N/A'))
-  airing_at = str(anime.get('airingAt_iso', 'N/A'))
+  timeUntilAiring = str(anime.get('timeUntilAiring') or 'N/A')
+  airing_at = str(anime.get('airingAt_iso') or 'N/A')
 
   return {
     'title': title,
@@ -73,7 +73,7 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
     color=discord.Color.green()
   )
 
-  embed.add_field(name=f"Episode {int(vars['episodes']) + 1} in", value=vars['timeUntilAiring'], inline=False)
+  embed.add_field(name=f"Episode {int(vars['episodes']) + 1} in", value=vars['time_until_airing'], inline=False)
   embed.add_field(name='Airing at', value=vars['airing_at'], inline=False)
 
   if vars['image']:

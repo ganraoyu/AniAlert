@@ -44,7 +44,7 @@ def search_anime_anilist(search):
     for episode in nodes:
         episode['airingAt_unix'] = episode['airingAt']
         episode['airingAt'] = datetime.utcfromtimestamp(episode['airingAt']).isoformat()
-        episode['timeUntilAiring'] = convert_unix(episode['timeUntilAiring'])
+        episode['time_until_airing'] = convert_unix(episode['timeUntilAiring'])
 
     return data
 
