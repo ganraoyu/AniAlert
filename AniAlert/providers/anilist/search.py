@@ -1,7 +1,7 @@
 import requests
 import json
-from datetime import datetime
-from utils.time_converter import convert_unix
+import datetime
+from AniAlert.utils.time_converter import convert_unix
 
 
 query = '''
@@ -40,16 +40,15 @@ def search_anime_anilist(search):
     )
     data = response.json()
 
-
     nodes = data['data']['Media']['airingSchedule']['nodes']
 
-    for episode in nodes:
-        episode['airingAt_unix'] = episode['airingAt']
-        episode['airingAt'] = datetime.utcfromtimestamp(episode['airingAt']).isoformat()
-        episode['time_until_airing'] = convert_unix(episode['timeUntilAiring'])
-
+    for node in nodes:
+      node['airingAt_unix'] = node['airingAt']
+      node['airingAt_iso'] = datetime.datetime.utcfromtimestamp(node['airingAt_unix']).strftime("%Y-%m-%dT%H:%M:%S")
+      node['time_until_airing'] = convert_unix(node['timeUntilAiring'])
+    
     return data
 
 if __name__ == '__main__':
-    response = search_anime_anilist('One Piece')
-    print(json.dumps(response, indent=2, ensure_ascii=False))
+  response = search_anime_anilist('One Piece')
+  print(json.dumps(response, indent=2, ensure_ascii=False))

@@ -13,7 +13,7 @@ def get_anime_variables(anime: dict):
   genres = str(anime.get('genres') or 'Unknown')
   image = anime.get('image')
   time_until_airing = str(anime.get('time_until_airing') or 'N/A')
-  airing_at = str(anime.get('airingAt_iso') or 'N/A')
+  airingAt_iso = str(anime.get('airingAt_iso') or 'N/A')
 
   return {
     'title': title,
@@ -26,7 +26,7 @@ def get_anime_variables(anime: dict):
     'genres': genres,
     'image': image,
     'time_until_airing': time_until_airing,
-    'airing_at': airing_at
+    'airingAt_iso': airingAt_iso
   }
 
 def build_search_anime_embed(anime: dict) -> discord.Embed:
@@ -74,7 +74,7 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
   )
 
   embed.add_field(name=f"Episode {int(vars['episodes']) + 1} in", value=vars['time_until_airing'], inline=False)
-  embed.add_field(name='Airing at', value=vars['airing_at'], inline=False)
+  embed.add_field(name='Airing at', value=vars['airingAt_iso'], inline=False)
 
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])

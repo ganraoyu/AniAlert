@@ -60,5 +60,3 @@ def convert_iso(iso_time: str) -> str:
 
     return "in " + " ".join(parts) if parts else "soon"
 
-example = convert_unix(424824)
-print(example)

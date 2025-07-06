@@ -4,7 +4,7 @@ SEASON = 'SUMMER'
 import requests
 import json
 import datetime
-from utils.time_converter import convert_unix
+from AniAlert.utils.time_converter import convert_unix
 
 query = '''
 query($page: Int, $perPage: Int, $seasonYear: Int, $season: MediaSeason, $type: MediaType) {
