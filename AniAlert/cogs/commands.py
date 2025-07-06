@@ -201,8 +201,9 @@ class NotifyAnimeAiredCog(commands.Cog):
 
   async def _process_user_guild_pair(self, user_id, guild_id):
     anime_list = check_notify_list(user_id, guild_id, self.cursor)
-    animes_aired = check_if_aired(anime_list)
-    if not animes_aired:
+    aired_list = check_if_aired(anime_list)  # List of (anime, episode) tuples
+
+    if not aired_list:
       return
 
     guild = self.bot.get_guild(guild_id)
@@ -213,8 +214,8 @@ class NotifyAnimeAiredCog(commands.Cog):
     if not channel:
       return
 
-    for anime in animes_aired:
-      await self._handle_anime_notification(anime, user_id, channel)
+    for anime, episode in aired_list:
+      await self._handle_anime_notification(anime, episode, user_id, channel)
 
   def _get_notification_channel(self, guild):
     return next(
@@ -222,7 +223,7 @@ class NotifyAnimeAiredCog(commands.Cog):
       None
     )
 
-  async def _handle_anime_notification(self, anime, user_id, channel):
+  async def _handle_anime_notification(self, anime, episode, user_id, channel):
     anime_id = anime['anime_id']
     anime_name = anime['anime_name']
     image_url = anime['image']
@@ -233,9 +234,8 @@ class NotifyAnimeAiredCog(commands.Cog):
       await self._handle_final_episode(anime_id, anime_name, user_id, channel)
       return
 
-    await self._send_airing_notification(anime_name, user_id, image_url, channel)
+    await self._send_airing_notification(anime_name, episode, user_id, image_url, channel)
     self._update_airing_time(anime_id, new_data[0])
-
     self.conn.commit()
 
   async def _handle_final_episode(self, anime_id, anime_name, user_id, channel):
@@ -247,9 +247,10 @@ class NotifyAnimeAiredCog(commands.Cog):
       )
     )
 
-  async def _send_airing_notification(self, anime_name, user_id, image_url, channel):
+  async def _send_airing_notification(self, anime_name, episode, user_id, image_url, channel):
     embed = build_anime_airing_notification_embed(
       anime_name=anime_name,
+      episode=episode,
       image_url=image_url,
       user_id=user_id
     )

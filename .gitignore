@@ -1,23 +1,30 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Virtual environment folder
+# Virtual Environment
 venv/
 ENV/
-env/
 
-# dotenv environment variables file
+# Environment variables
 .env
 
-# VS Code settings folder
-.vscode/
-
-# Python cache files
-*.pyc
-
-# Ignore SQLite database files
+# Database
 *.db
 *.sqlite3
-data.db
+
+# IDE files
+.idea/
+.vscode/

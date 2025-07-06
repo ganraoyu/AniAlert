@@ -1,9 +1,9 @@
 import json
 from datetime import datetime
-from providers.anilist.search import search_anime_anilist
-from providers.anilist.seasonal import get_seasonal_animes_anilist
-from providers.anilist.randomize import get_random_anime
-from providers import search_kitsu_anime
+from AniAlert.providers.anilist.search import search_anime_anilist
+from AniAlert.providers.anilist.seasonal import get_seasonal_animes_anilist
+from AniAlert.providers.anilist.randomize import get_random_anime
+from AniAlert.providers import search_kitsu_anime
 
 
 def extract_airing_nodes(air_time: dict):

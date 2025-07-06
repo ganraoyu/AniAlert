@@ -106,9 +106,9 @@ def build_anime_notify_list_embed(anime_name: str, id: int, episode: int, iso_ai
   embed.set_footer(text="AniAlert • Notification List")
   return embed
 
-def build_anime_airing_notification_embed(anime_name: str, image_url: str, user_id: str) -> discord.Embed:
+def build_anime_airing_notification_embed(anime_name: str, episode: int, image_url: str, user_id: str) -> discord.Embed:
   embed = discord.Embed(
-    title=f'📢 New Episode Aired: {anime_name}',
+    title=f'📢Episode {episode} Aired: {anime_name}',
     description=f'<@{user_id}> A new episode just dropped — go check it out!',
     color=discord.Color.dark_blue()
   )

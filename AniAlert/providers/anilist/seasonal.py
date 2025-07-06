@@ -104,5 +104,5 @@ def get_seasonal_animes_anilist(page: int, perPage: int):
     return anime_data
 
 if __name__ == '__main__':
-    result = get_seasonal_animes_anilist(1, 1)
+    result = get_seasonal_animes_anilist(1, 5)
     print(json.dumps(result, indent=2, ensure_ascii=False))
