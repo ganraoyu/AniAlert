@@ -20,6 +20,7 @@ from utils.embed_builder import build_anime_airing_notification_embed
 from utils.embed_builder import build_remove_anime_embed
 from utils.embed_builder import build_random_anime_embed
 
+from utils.choices import get_choices
 from utils.interaction_helper import get_user_and_guild_ids
 from utils.button_builder import anime_buttons_view
 
@@ -55,14 +56,7 @@ class SeasonalAnimeLookUpCog(commands.Cog):
     await interaction.followup.send(message, ephemeral=True)
 
 class AllAnimeSearchCog(commands.Cog):
-  MEDIA_TYPE_CHOICES = [
-    app_commands.Choice(name='All', value='all'),
-    app_commands.Choice(name='TV', value='TV'),
-    app_commands.Choice(name='Movie', value='movie'),
-    app_commands.Choice(name='OVA', value='OVA'),
-    app_commands.Choice(name='ONA', value='ONA'),
-    app_commands.Choice(name='Special', value='special'),
-  ]
+  MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES = get_choices()
 
   def __init__(self, bot):
     self.bot = bot
@@ -71,28 +65,32 @@ class AllAnimeSearchCog(commands.Cog):
   @app_commands.describe(
     name="Anime name to search",
     results_shown="How many results to show",
-    media_type="Type of media"
+    media_type="Type of media",
+    status='Status of current anime'
   )
-  @app_commands.choices(media_type=MEDIA_TYPE_CHOICES)
+  @app_commands.choices(media_type=MEDIA_TYPE_CHOICES, status=STATUS_TYPE_CHOICES)
   async def search(
     self,
     interaction: Interaction,
     name: str,
     results_shown: int,
-    media_type: Optional[app_commands.Choice[str]] = None
+    media_type: Optional[app_commands.Choice[str]] = None,
+    status: Optional[app_commands.Choice[str]] = None
   ):
     await interaction.response.defer(ephemeral=True)
 
-    animes = self._search_anime(name, results_shown, media_type)
+    animes = self._search_anime(name, results_shown, media_type, status)
     if not animes:
       await interaction.followup.send("⚠️ No anime found.", ephemeral=True)
       return
 
     await self._send_results(interaction, animes)
 
-  def _search_anime(self, name: str, results: int, media_type: Optional[app_commands.Choice[str]]) -> list:
+  def _search_anime(self, name: str, results: int, media_type: Optional[app_commands.Choice[str]], status: Optional[app_commands.Choice[str]]) -> list:
     media_value = media_type.value if media_type else "all"
-    return get_full_anime_info(name, results, media_value)
+    status_value = status.value if status else "all"
+    return get_full_anime_info(name, results, media_value, status_value)
+
 
   async def _send_results(self, interaction: Interaction, animes: list[dict]):
     for anime in animes:
@@ -343,7 +341,6 @@ class RandomAnimeCog(commands.Cog):
     embed = build_random_anime_embed(anime)
 
     await interaction.followup.send(embed=embed, ephemeral=True)
-
 
 async def setup(bot):
   await bot.add_cog(SeasonalAnimeLookUpCog(bot))
