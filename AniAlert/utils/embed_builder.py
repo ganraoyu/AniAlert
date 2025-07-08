@@ -59,6 +59,11 @@ def build_seasonal_anime_embed(anime: dict) -> discord.Embed:
     color=discord.Color.blue()
   )
 
+  embed.add_field(name='📺 Type', value=vars['show_type'], inline=True)
+  embed.add_field(name='⭐ Rating', value=vars['rating'], inline=True)
+  embed.add_field(name='🎞️ Episodes', value=vars['episodes'], inline=True)
+  embed.add_field(name='🎭 Genres', value=vars['genres'], inline=True)
+
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
 

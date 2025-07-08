@@ -8,7 +8,7 @@ class GetChoices(commands.Cog):
     MEDIA_TYPE_CHOICES = [
       app_commands.Choice(name='All', value='all'),
       app_commands.Choice(name='TV', value='TV'),
-      app_commands.Choice(name='Movie', value='movie'),
+      app_commands.Choice(name='Movie', value='MOVIE'),
       app_commands.Choice(name='OVA', value='OVA'),
       app_commands.Choice(name='ONA', value='ONA'),
       app_commands.Choice(name='Special', value='special'),

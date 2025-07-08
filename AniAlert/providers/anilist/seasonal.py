@@ -1,6 +1,8 @@
 YEAR = 2025
 SEASON = 'SUMMER'
 
+from typing import List, Union
+
 import requests
 import json
 import datetime
@@ -15,7 +17,8 @@ query(
   $season: MediaSeason,
   $type: MediaType,
   $genres: [String],
-  $tags: [String]
+  $tags: [String],
+  $media_type: [MediaFormat],
 ) {
   Page(page: $page, perPage: $perPage) {
     media(
@@ -25,21 +28,50 @@ query(
       genre_in: $genres,
       tag_in: $tags,
       sort: [POPULARITY_DESC]
+      format_in: $media_type
     ) {
       id
       title {
         romaji
         english
       }
+      format
       genres
       tags {
         name
       }
       averageScore
+      meanScore
       popularity
+      episodes
       description
       coverImage {
         extraLarge
+      }
+      startDate {
+        year
+        month
+        day
+      }
+      endDate {
+        year
+        month
+        day
+      }
+      status
+      format
+      studios {
+        nodes {
+          name
+        }
+      }
+      rankings {
+        rank
+        type
+        allTime
+        context
+        year
+        season
       }
       airingSchedule(notYetAired: true) {
         nodes {
@@ -53,7 +85,7 @@ query(
 }
 '''
 
-def get_seasonal_animes_anilist(page: int, per_page: int, genres: list[str]):
+def get_seasonal_animes_anilist(page: int, per_page: int, genres: str = 'all', media_type: str = 'all'):
   common_genres, common_tags = get_common_genres_tags()
 
   filtered_genres = []
@@ -73,11 +105,14 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: list[str]):
     'type': 'ANIME',
   }
 
-  if filtered_genres:
+  if genres != 'all' and filtered_genres:
     variables['genres'] = filtered_genres
 
-  if filtered_tags:
+  if genres != 'all' and filtered_tags:
     variables['tags'] = filtered_tags
+
+  if media_type != 'all':
+    variables['media_type'] = media_type
   
   response = requests.post(
     'https://graphql.anilist.co',
@@ -92,6 +127,7 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: list[str]):
     anilist_id = anime.get('id', -1)
     title_info = anime.get('title', {})
     title = title_info.get('english') or title_info.get('romaji') or 'Unknown Title'
+    show_type = anime.get('format')
     genres = anime.get('genres', [])
     tags = anime.get('tags', [])
 
@@ -114,13 +150,14 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: list[str]):
     if airing_at_unix:
       airing_at_iso = datetime.datetime.utcfromtimestamp(airing_at_unix).strftime("%Y-%m-%dT%H:%M:%S")
 
-    for html_tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>']:
+    for html_tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>', '\n']:
       description = description.replace(html_tag, '')
 
     anime_list.append({
       'anilist_id': anilist_id,
       'title': title,
-      'genres': genres,
+      'show_type': show_type,
+      'genres': ', '.join(genres),
       'average_rating': average_score,
       'synopsis': description,
       'image': image_url,
@@ -133,5 +170,5 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: list[str]):
   return anime_list
 
 if __name__ == '__main__':
-  result = get_seasonal_animes_anilist(1, 5, ['Isekai'])
+  result = get_seasonal_animes_anilist(1, 5, ["Drama"])
   print(json.dumps(result, indent=2, ensure_ascii=False))
