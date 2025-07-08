@@ -1,17 +1,17 @@
 import sys
 import os
+from typing import List, Optional
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from db.database import cursor, conn
 
-from typing import Optional
 from discord.ext import commands, tasks
 from discord import app_commands, Interaction
 
 from services.anime_service import get_full_anime_info
 from services.anime_service import get_seasonal_anime_info
 from services.anime_service import get_random_anime_suggestion
-from services.airing_checker import check_notify_list, check_if_aired 
+from services.airing_checker import check_notify_list, check_if_aired
 
 from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_seasonal_anime_embed
@@ -27,15 +27,24 @@ from utils.button_builder import anime_buttons_view
 from views.search_modal import SearchAnimeInput
 from views.pick_anime_view import PickAnimeView
 
-class SeasonalAnimeLookUpCog(commands.Cog): 
+MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES = get_choices()
+
+class SeasonalAnimeLookUpCog(commands.Cog):
+
   def __init__(self, bot):
     self.bot = bot
 
   @app_commands.command(name='seasonal_anime', description='Look up currently airing seasonal anime')
-  async def seasonal_anime(self, interaction: Interaction, page: int, results_shown: int):
+  @app_commands.describe(
+    page='Which Page to search',
+    results_shown='How many results to show',
+    genres='Filter results by genres',
+  )
+  @app_commands.choices(genres=POPULAR_GENRE_TAG_CHOICES)
+  async def seasonal_anime(self, interaction: Interaction, page: int, results_shown: int, genres: str):
     await interaction.response.defer(ephemeral=True)
 
-    animes = self._fetch_seasonal_anime(page, results_shown)
+    animes = self._fetch_seasonal_anime(page, results_shown, genres)
 
     if not animes:
       await self._send_no_results(interaction)
@@ -43,10 +52,12 @@ class SeasonalAnimeLookUpCog(commands.Cog):
 
     await self._send_anime_embeds(interaction, animes)
 
-  def _fetch_seasonal_anime(self, page: int, results_shown: int) -> list:
-    return get_seasonal_anime_info(page, results_shown)
+  def _fetch_seasonal_anime(self, page: int, results_shown: int, genres: str) -> list:
+    # Convert single genre string to list
+    genres_list = [genres] if genres else []
+    return get_seasonal_anime_info(page, results_shown, genres_list)
 
-  async def _send_anime_embeds(self, interaction: Interaction, animes: list[dict]):
+  async def _send_anime_embeds(self, interaction: Interaction, animes: List[dict]):
     for anime in animes:
       embed = build_seasonal_anime_embed(anime)
       buttons = anime_buttons_view(anime)
@@ -56,7 +67,6 @@ class SeasonalAnimeLookUpCog(commands.Cog):
     await interaction.followup.send(message, ephemeral=True)
 
 class AllAnimeSearchCog(commands.Cog):
-  MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES = get_choices()
 
   def __init__(self, bot):
     self.bot = bot
@@ -91,14 +101,14 @@ class AllAnimeSearchCog(commands.Cog):
     status_value = status.value if status else "all"
     return get_full_anime_info(name, results, media_value, status_value)
 
-
-  async def _send_results(self, interaction: Interaction, animes: list[dict]):
+  async def _send_results(self, interaction: Interaction, animes: List[dict]):
     for anime in animes:
       embed = build_search_anime_embed(anime)
       buttons = anime_buttons_view(anime)
       await interaction.followup.send(embed=embed, view=buttons, ephemeral=True)
 
 class RemoveAnimeCog(commands.Cog):
+
   def __init__(self, bot, cursor, conn):
     self.bot = bot
     self.cursor = cursor
@@ -139,8 +149,9 @@ class RemoveAnimeCog(commands.Cog):
       )
 
     self.conn.commit()
-  
+
 class CheckNotifyListCog(commands.Cog):
+
   def __init__(self, bot, cursor):
     self.bot = bot
     self.cursor = cursor
@@ -165,12 +176,12 @@ class CheckNotifyListCog(commands.Cog):
     user_id, guild_id = get_user_and_guild_ids(interaction)
     return int(user_id), int(guild_id)
 
-  def _fetch_notify_list(self, user_id: int, guild_id: int) -> list[tuple]:
+  def _fetch_notify_list(self, user_id: int, guild_id: int) -> List[tuple]:
     query = 'SELECT * FROM anime_notify_list WHERE user_id = ? AND guild_id = ?'
     self.cursor.execute(query, (user_id, guild_id))
     return self.cursor.fetchall()
 
-  def _create_notify_list_embeds(self, results: list[tuple]):
+  def _create_notify_list_embeds(self, results: List[tuple]):
     embeds = []
     for anime in results:
       id = anime[0]
@@ -183,6 +194,7 @@ class CheckNotifyListCog(commands.Cog):
     return embeds
 
 class NotifyAnimeAiredCog(commands.Cog):
+
   def __init__(self, bot, cursor, conn):
     self.bot = bot
     self.cursor = cursor
@@ -265,6 +277,7 @@ class NotifyAnimeAiredCog(commands.Cog):
     )
 
 class ClearNotifyListCog(commands.Cog):
+
   def __init__(self, bot, cursor, conn):
     self.bot = bot
     self.cursor = cursor
@@ -302,6 +315,7 @@ class CharacterSearchCog(commands.Cog):
   pass
 
 class RandomAnimeCog(commands.Cog):
+
   GENRES = [
     app_commands.Choice(name='Action', value='Action'),
     app_commands.Choice(name='Adventure', value='Adventure'),
@@ -326,11 +340,9 @@ class RandomAnimeCog(commands.Cog):
 
   def __init__(self, bot):
     self.bot = bot
-  
-  @app_commands.command(name='random_anime_suggestion', description='Get a random anime ' \
-  'based on genre')
+
+  @app_commands.command(name='random_anime_suggestion', description='Get a random anime based on genre')
   @app_commands.describe(genres='Enter genres separated by commas (e.g. Action,Adventure)')
-  @app_commands.choices(genres=GENRES)
   async def random(self, interaction: Interaction, genres: str):
     await interaction.response.defer()
 

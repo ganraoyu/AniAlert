@@ -5,14 +5,25 @@ import requests
 import json
 import datetime
 from AniAlert.utils.time_converter import convert_unix
+from AniAlert.utils.common_genres_tags import get_common_genres_tags
 
 query = '''
-query($page: Int, $perPage: Int, $seasonYear: Int, $season: MediaSeason, $type: MediaType) {
+query(
+  $page: Int,
+  $perPage: Int,
+  $seasonYear: Int,
+  $season: MediaSeason,
+  $type: MediaType,
+  $genres: [String],
+  $tags: [String]
+) {
   Page(page: $page, perPage: $perPage) {
     media(
       seasonYear: $seasonYear,
       season: $season,
       type: $type,
+      genre_in: $genres,
+      tag_in: $tags,
       sort: [POPULARITY_DESC]
     ) {
       id
@@ -20,89 +31,107 @@ query($page: Int, $perPage: Int, $seasonYear: Int, $season: MediaSeason, $type: 
         romaji
         english
       }
+      genres
+      tags {
+        name
+      }
       averageScore
       popularity
-      rankings {
-        rank
-        type
-        allTime
-        context
-        season
-        year
-      }
-      season
-      seasonYear
       description
-      airingSchedule(notYetAired: true){
-        nodes{
+      coverImage {
+        extraLarge
+      }
+      airingSchedule(notYetAired: true) {
+        nodes {
           airingAt
           timeUntilAiring
           episode
         }
-      }
-      coverImage{
-        extraLarge
       }
     }
   }
 }
 '''
 
-def get_seasonal_animes_anilist(page: int, perPage: int):
-    variables = {
-        'page': page,
-        'perPage': perPage,
-        'seasonYear': YEAR,
-        'season': SEASON,
-        'type': 'ANIME'
-    }
+def get_seasonal_animes_anilist(page: int, per_page: int, genres: list[str]):
+  common_genres, common_tags = get_common_genres_tags()
 
-    response = requests.post(
-        'https://graphql.anilist.co',
-        json={'query': query, 'variables': variables}
-    )
+  filtered_genres = []
+  filtered_tags = []
 
-    data = response.json()
-    anime_data = []
+  for genre in genres:
+    if genre in common_tags:
+      filtered_tags.append(genre)
+    else:
+      filtered_genres.append(genre)
 
-    for index, anime in enumerate(data['data']['Page']['media']):
-        anilist_id = anime.get('id', -1)
-        title_data = anime.get('title', {})
-        title = title_data.get('english') or title_data.get('romaji') or 'Unknown Title'
-        average_rating = anime.get('averageScore', 0)
-        ranking = index + 1
-        synopsis = anime.get('description', '')
-        image = anime.get('coverImage', {}).get('extraLarge')
+  variables = {
+    'page': page,
+    'perPage': per_page,
+    'seasonYear': YEAR,
+    'season': SEASON,
+    'type': 'ANIME',
+  }
 
-        airing_nodes = anime.get('airingSchedule', {}).get('nodes', [])
-        airing_info = airing_nodes[0] if airing_nodes else {}
+  if filtered_genres:
+    variables['genres'] = filtered_genres
 
-        airingAt_unix = airing_info.get('airingAt')
-        airingAt_iso = None
-        time_until_airing = convert_unix(airing_info.get('timeUntilAiring'))
-        episodes = airing_info.get('episode')
+  if filtered_tags:
+    variables['tags'] = filtered_tags
+  
+  response = requests.post(
+    'https://graphql.anilist.co',
+    json={'query': query, 'variables': variables}
+  )
+  response.raise_for_status()
+  data = response.json()
 
-        if airingAt_unix:
-            airingAt_iso = datetime.datetime.utcfromtimestamp(airingAt_unix).strftime("%Y-%m-%dT%H:%M:%S")
+  anime_list = []
 
-        for tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>']:
-            synopsis = synopsis.replace(tag, '')
+  for index, anime in enumerate(data.get('data', {}).get('Page', {}).get('media', [])):
+    anilist_id = anime.get('id', -1)
+    title_info = anime.get('title', {})
+    title = title_info.get('english') or title_info.get('romaji') or 'Unknown Title'
+    genres = anime.get('genres', [])
+    tags = anime.get('tags', [])
 
-        anime_data.append({
-            'anilist_id': anilist_id,
-            'title': title,
-            'average_rating': average_rating,
-            'seasonal_ranking': ranking,
-            'synopsis': synopsis,
-            'image': image,
-            'airingAt_unix': airingAt_unix,
-            'airingAt_iso': airingAt_iso,
-            'time_until_airing': time_until_airing,
-            'episodes': episodes
-        })
+    filtered_tag_names = [
+      tag['name'] for tag in tags if tag.get('name') in common_tags
+    ]
 
-    return anime_data
+    genres = filtered_tag_names + genres
+    average_score = anime.get('averageScore', 0)
+    description = anime.get('description', '') or ''
+    image_url = anime.get('coverImage', {}).get('extraLarge')
+
+    airing_nodes = anime.get('airingSchedule', {}).get('nodes', [])
+    first_airing = airing_nodes[0] if airing_nodes else {}
+    airing_at_unix = first_airing.get('airingAt')
+    airing_at_iso = None
+    time_until_airing = convert_unix(first_airing.get('timeUntilAiring'))
+    episodes = first_airing.get('episode')
+
+    if airing_at_unix:
+      airing_at_iso = datetime.datetime.utcfromtimestamp(airing_at_unix).strftime("%Y-%m-%dT%H:%M:%S")
+
+    for html_tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>']:
+      description = description.replace(html_tag, '')
+
+    anime_list.append({
+      'anilist_id': anilist_id,
+      'title': title,
+      'genres': genres,
+      'average_rating': average_score,
+      'synopsis': description,
+      'image': image_url,
+      'airingAt_unix': airing_at_unix,
+      'airingAt_iso': airing_at_iso,
+      'time_until_airing': time_until_airing,
+      'episodes': episodes
+    })
+
+  return anime_list
 
 if __name__ == '__main__':
-    result = get_seasonal_animes_anilist(1, 5)
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+  result = get_seasonal_animes_anilist(1, 5, ['Isekai'])
+  print(json.dumps(result, indent=2, ensure_ascii=False))
