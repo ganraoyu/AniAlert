@@ -73,7 +73,6 @@ def get_full_anime_info(name: str, results_shown: int = 1, media_type: str = 'al
 
     nodes = extract_airing_nodes(anilist_data)
     genres = media.get('genres', [])
-
     anime['genres'] = ', '.join(genres) if genres else 'N/A'
     anime['airing'] = bool(nodes)
 
@@ -99,7 +98,7 @@ def get_seasonal_anime_info(page: int, results_shown: int, genres: list[str] = '
   return results
 
 
-def get_random_anime_suggestion(genres: list[str]) -> list:
+def get_random_anime_suggestion(genres: list[str], media_type: str = 'all') -> list:
   results = get_random_anime(genres)
   return results
 

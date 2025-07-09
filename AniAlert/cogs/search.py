@@ -12,7 +12,6 @@ from utils.button_builder import anime_buttons_view
 MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES = get_choices()
 
 class AllAnimeSearchCog(commands.Cog):
-
   def __init__(self, bot):
     self.bot = bot
 

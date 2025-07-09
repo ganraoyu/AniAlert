@@ -63,6 +63,7 @@ query(
       studios {
         nodes {
           name
+          isAnimationStudio
         }
       }
       rankings {
@@ -127,6 +128,14 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: str = 'all', m
     anilist_id = anime.get('id', -1)
     title_info = anime.get('title', {})
     title = title_info.get('english') or title_info.get('romaji') or 'Unknown Title'
+
+    studios_array = []
+
+    for studio in anime.get('studios', {}).get('nodes', []):
+      if studio['isAnimationStudio'] == True:
+        studios_array.append(studio.get('name', 'Unknown Studio'))
+        print(studio)
+  
     show_type = anime.get('format')
     genres = anime.get('genres', [])
     tags = anime.get('tags', [])
@@ -156,8 +165,9 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: str = 'all', m
     anime_list.append({
       'anilist_id': anilist_id,
       'title': title,
+      'studios':', '.join(set(studios_array)),
       'show_type': show_type,
-      'genres': ', '.join(genres),
+      'genres': ', '.join(genres[:4]),
       'average_rating': average_score,
       'synopsis': description,
       'image': image_url,

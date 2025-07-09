@@ -5,6 +5,7 @@ from .time_converter import convert_iso
 def get_anime_variables(anime: dict):
   title = anime.get('title') or 'Unknown Title'
   synopsis = anime.get('synopsis') or 'No synopsis available.'
+  studios = str(anime.get('studios') or 'N/A')
   show_type = str(anime.get('show_type') or 'N/A')
   rating = str(anime.get('average_rating') or 'N/A')
   episodes = str(anime.get('episodes') or 0)
@@ -18,6 +19,7 @@ def get_anime_variables(anime: dict):
   return {
     'title': title,
     'synopsis': synopsis,
+    'studios': studios,
     'show_type': show_type,
     'rating': rating,
     'episodes': episodes,
@@ -62,6 +64,8 @@ def build_seasonal_anime_embed(anime: dict) -> discord.Embed:
   embed.add_field(name='📺 Type', value=vars['show_type'], inline=True)
   embed.add_field(name='⭐ Rating', value=vars['rating'], inline=True)
   embed.add_field(name='🎞️ Episodes', value=vars['episodes'], inline=True)
+  embed.add_field(name=f"⏰ Episode {int(vars['episodes']) + 1} airs in", value=vars['time_until_airing'], inline=True)
+  embed.add_field(name='🎬 Studios', value=vars['studios'], inline=True)
   embed.add_field(name='🎭 Genres', value=vars['genres'], inline=True)
 
   if vars['image']:
@@ -79,7 +83,7 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
   )
 
   embed.add_field(name=f"Episode {int(vars['episodes']) + 1} in", value=vars['time_until_airing'], inline=False)
-  embed.add_field(name='Airing at', value=vars['airingAt_iso'], inline=False)
+  embed.add_field(name='🗓️ Airing at', value=vars['airingAt_iso'], inline=False)
 
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
@@ -129,8 +133,12 @@ def build_random_anime_embed(anime: dict):
     description=vars['synopsis'],
     color=discord.Color.random()
   )
-
+  
+  embed.add_field(name='📺 Type', value=vars['show_type'], inline=True)  
+  embed.add_field(name='⭐ Rating', value=vars['rating'], inline=True)
   embed.add_field(name='🎞️ Episodes', value=vars['episodes'], inline=True)
+  embed.add_field(name='🗓️ Airing', value=vars['airing'], inline=True)
+  embed.add_field(name='🎬 Studios', value=vars['studios'], inline=True)
   embed.add_field(name='🎭 Genres', value=vars['genres'], inline=True)
 
   if vars['image']:

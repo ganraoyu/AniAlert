@@ -15,7 +15,7 @@ bot = commands.Bot(command_prefix="$", intents=intents)
 async def on_ready():
   print(f"Logged in as {bot.user}!")
   try:
-    await bot.load_extension("cogs.commands")
+    await bot.load_extension("cogs._commands")
     print("Successfully loaded commands cog!") 
     
     print("Syncing application commands...")

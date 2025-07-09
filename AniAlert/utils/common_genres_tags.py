@@ -18,26 +18,29 @@ def get_common_genres_tags():
   ] 
 
   common_tags = [
+    "Shounen",
+    "Shoujo",
     "Isekai",
     "Magic",
-    "Male Protagonist",
-    "Female Protagonist",
     "Reincarnation",
+    "Game",
+    "School",
+    "Martial Arts",
+    "Survival",
+    "Military",
+    "Harem",
+    "Psychological",
+    "Time Travel",
+    "Virtual World",
     "Demons",
     "Dragons",
     "Gore",
-    "Martial Arts",
-    "School",
-    "Historical",
-    "Military",
-    "Survival",
-    "Time Travel",
-    "Virtual World",
-    "Game",
-    "Harem",
+    "Romantic Comedy",
+    "Vampire",
+    "Ecchi",
     "Parody",
     "Coming of Age",
-    "Vampire"
   ]
+
   
   return common_genres, common_tags
