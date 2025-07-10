@@ -2,7 +2,6 @@ YEAR = 2025
 SEASON = 'SUMMER'
 
 from typing import List, Union
-
 import requests
 import json
 import datetime
@@ -86,7 +85,14 @@ query(
 }
 '''
 
-def get_seasonal_animes_anilist(page: int, per_page: int, genres: str = 'all', media_type: str = 'all'):
+def get_seasonal_animes_anilist(
+    page: int, 
+    per_page: int, 
+    genres: str = 'all', 
+    media_type: str = 'all', 
+    year: int = YEAR, 
+    season: str = SEASON 
+    ):
   common_genres, common_tags = get_common_genres_tags()
 
   filtered_genres = []
@@ -105,7 +111,7 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: str = 'all', m
     'season': SEASON,
     'type': 'ANIME',
   }
-
+  
   if genres != 'all' and filtered_genres:
     variables['genres'] = filtered_genres
 
@@ -134,7 +140,6 @@ def get_seasonal_animes_anilist(page: int, per_page: int, genres: str = 'all', m
     for studio in anime.get('studios', {}).get('nodes', []):
       if studio['isAnimationStudio'] == True:
         studios_array.append(studio.get('name', 'Unknown Studio'))
-        print(studio)
   
     show_type = anime.get('format')
     genres = anime.get('genres', [])
