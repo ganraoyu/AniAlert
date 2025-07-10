@@ -21,6 +21,7 @@ class RandomAnimeCog(commands.Cog):
     media_type: str = None
     ):
     await interaction.response.defer()
+    
     if genres:
       genre_list = [g.strip() for g in genres.split(',') if g.strip()]
     else:

@@ -97,7 +97,7 @@ def _extract_anime_details(anime: dict) -> dict:
   }
 
 # This is only for the multiple choices in guess anime command.
-def _remaining_animes(animes: dict):
+def _remaining_animes(animes: dict) -> list[str]:
   remaining_anime_titles = []
   for i in range(1, 4):
     anime = animes[i]

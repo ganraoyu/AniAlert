@@ -15,6 +15,7 @@ def get_anime_variables(anime: dict):
   image = anime.get('image')
   time_until_airing = str(anime.get('time_until_airing') or 'N/A')
   airingAt_iso = str(anime.get('airingAt_iso') or 'N/A')
+  remaining_anime_titles = anime.get('remaining_anime_titles' or 'N/A')
 
   return {
     'title': title,
@@ -28,7 +29,8 @@ def get_anime_variables(anime: dict):
     'genres': genres,
     'image': image,
     'time_until_airing': time_until_airing,
-    'airingAt_iso': airingAt_iso
+    'airingAt_iso': airingAt_iso,
+    'remaining_anime_titles': remaining_anime_titles,
   }
 
 def build_search_anime_embed(anime: dict) -> discord.Embed:
@@ -88,7 +90,8 @@ def build_add_anime_embed(anime: dict) -> discord.Embed:
   if vars['image']:
     embed.set_thumbnail(url=vars['image'])
 
-  embed.set_footer(text="AniAlert • Anime Added")
+  embed.set_footer(text="AniAlert • Anime Added") 
+   
   return embed
 
 def build_remove_anime_embed(anime: dict) -> discord.Embed:
@@ -145,4 +148,15 @@ def build_random_anime_embed(anime: dict):
     embed.set_thumbnail(url=vars['image'])
 
   embed.set_footer(text="AniAlert • Random Anime Generator")
+  return embed
+
+def build_guess_anime_embed(anime: dict) -> discord.Embed:
+  vars = get_anime_variables(anime)
+
+  embed = discord.Embed(
+    color=discord.Color.dark_magenta()
+  )
+
+  embed.set_image(url=vars['image'])
+
   return embed

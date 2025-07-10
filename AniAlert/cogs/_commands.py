@@ -11,6 +11,7 @@ from .notify_list import CheckNotifyListCog
 from .notify_airing import NotifyAnimeAiredCog
 from .clear_notify_list import ClearNotifyListCog
 from .random import RandomAnimeCog
+from .guess import GuessAnimeCog
 
 async def setup(bot):
   await bot.add_cog(SeasonalAnimeLookUpCog(bot))
@@ -20,3 +21,4 @@ async def setup(bot):
   await bot.add_cog(RemoveAnimeCog(bot, cursor, conn))
   await bot.add_cog(ClearNotifyListCog(bot, cursor, conn))
   await bot.add_cog(RandomAnimeCog(bot))
+  await bot.add_cog(GuessAnimeCog(bot))

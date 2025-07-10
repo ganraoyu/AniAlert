@@ -1,4 +1,5 @@
 import sqlite3
+import json
 
 conn = sqlite3.connect("data.db")
 cursor = conn.cursor()
@@ -30,6 +31,6 @@ if __name__ == '__main__':
 
   print("Rows in anime_notify_list:")
   for row in rows:
-      print(row)
+      print(json.dumps(row, indent=2))
 
   conn.close()
