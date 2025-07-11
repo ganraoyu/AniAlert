@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from discord.ext import commands
 from discord import app_commands, Interaction
@@ -10,12 +10,19 @@ from utils.choices import get_choices
 
 MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES, YEAR_CHOICES, SEASON_CHOICES = get_choices()
 
-def _fetch_seasonal_anime(page: int, results_shown: int, genres: Optional[str], media_type: Optional[str], year: Optional[int], season: Optional[str]) -> list:
+def _fetch_seasonal_anime(
+    page: int, 
+    results_shown: int, 
+    genres: Optional[str], 
+    media_type: Optional[str], 
+    year: Optional[int], 
+    season: Optional[str]
+  ) -> list:
   genres_list = [genres] if genres else []
   media_value = media_type if media_type else "all"
   return get_seasonal_anime_info(page, results_shown, genres_list, media_value, year, season)
 
-async def _send_anime_embeds(interaction: Interaction, animes: List[dict]):
+async def _send_anime_embeds(interaction: Interaction, animes: list[dict]):
   for anime in animes:
     embed = build_seasonal_anime_embed(anime)
     buttons = anime_buttons_view(anime)
@@ -37,7 +44,12 @@ class SeasonalAnimeLookUpCog(commands.Cog):
     year='Year of the season',
     season='Season of the year'
   )
-  @app_commands.choices(genres=POPULAR_GENRE_TAG_CHOICES, media_type=MEDIA_TYPE_CHOICES, year=YEAR_CHOICES, season=SEASON_CHOICES)
+  @app_commands.choices(
+    genres=POPULAR_GENRE_TAG_CHOICES, 
+    media_type=MEDIA_TYPE_CHOICES, 
+    year=YEAR_CHOICES, 
+    season=SEASON_CHOICES
+  )
   async def seasonal_anime(
     self, 
     interaction: Interaction, 
@@ -55,8 +67,8 @@ class SeasonalAnimeLookUpCog(commands.Cog):
       results_shown,
       genres.value if genres else None,
       media_type.value if media_type else None,
-      year.value if year else None,
-      season.value if season else None
+      year.value if year else 2025,
+      season.value if season else 'Summer'
     )
 
     if not animes:

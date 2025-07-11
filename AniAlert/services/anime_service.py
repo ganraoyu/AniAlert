@@ -19,7 +19,7 @@ def extract_genres(anime: dict):
   return genres
 
 
-# This is needed since Kitsu doesn't provide current airing anime episodes
+# This is needed since Kitsu doesn't provide current airing anime episodes :(
 def extract_episodes(anime: dict, nodes: dict, index: int) -> dict:
   if isinstance(nodes, dict):
     nodes = [nodes]
@@ -91,7 +91,6 @@ def get_full_anime_info(name: str, results_shown: int = 1, media_type: str = 'al
     extract_episodes(anime, nodes, index)
 
   return anime_list
-
 
 def get_seasonal_anime_info(
     page: int, 

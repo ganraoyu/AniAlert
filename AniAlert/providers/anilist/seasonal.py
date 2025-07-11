@@ -120,7 +120,15 @@ def get_seasonal_animes_anilist(
 
   if media_type != 'all':
     variables['media_type'] = media_type
+
+  if year != 2025:
+    year = year
   
+  if season not in ['WINTER', 'SPRING', 'SUMMER', 'FALL']:
+    season = SEASON
+
+  
+
   response = requests.post(
     'https://graphql.anilist.co',
     json={'query': query, 'variables': variables}
@@ -185,5 +193,5 @@ def get_seasonal_animes_anilist(
   return anime_list
 
 if __name__ == '__main__':
-  result = get_seasonal_animes_anilist(1, 5, ["Drama"], ['TV'], 2024, "SPRING")
+  result = get_seasonal_animes_anilist(1, 5)
   print(json.dumps(result, indent=2, ensure_ascii=False))

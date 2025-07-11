@@ -6,10 +6,11 @@ from discord import app_commands, Interaction
 from services.anime_service import get_full_anime_info
 from utils.embed_builder import build_search_anime_embed
 from utils.embed_builder import build_remove_anime_embed
-from utils.choices import get_choices
+from utils.choices import status_type_choices, media_type_choices
 from utils.button_builder import anime_buttons_view
 
-MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES, YEAR_CHOICES, SEASON_CHOICES = get_choices()
+MEDIA_TYPE_CHOICES = media_type_choices()
+STATUS_TYPE_CHOICES = status_type_choices()
 
 
 def _search_anime(name: str, results: int, media_type: Optional[app_commands.Choice[str]], status: Optional[app_commands.Choice[str]]) -> list:
