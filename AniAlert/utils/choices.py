@@ -89,9 +89,19 @@ class GetChoices(commands.Cog):
         app_commands.Choice(name="Vampire", value="Vampire"),
     ]
 
+    YEAR_CHOICES = [
+        app_commands.Choice(name=str(year), value=year) for year in range(2000, 2025)
+    ]
 
-    return MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES
+    SEASON_CHOICES = [
+        app_commands.Choice(name="Winter", value="WINTER"),
+        app_commands.Choice(name="Spring", value="SPRING"),
+        app_commands.Choice(name="Summer", value="SUMMER"),
+        app_commands.Choice(name="Fall", value="FALL"),
+    ]
+
+    return MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES, YEAR_CHOICES, SEASON_CHOICES
 
 def get_choices():
-  MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES = GetChoices.choices()
-  return MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES
+  MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES, YEAR_CHOICES, SEASON_CHOICES = GetChoices.choices()
+  return MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES, YEAR_CHOICES, SEASON_CHOICES

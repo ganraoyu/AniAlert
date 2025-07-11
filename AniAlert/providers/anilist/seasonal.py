@@ -107,8 +107,8 @@ def get_seasonal_animes_anilist(
   variables = {
     'page': page,
     'perPage': per_page,
-    'seasonYear': YEAR,
-    'season': SEASON,
+    'seasonYear': year,
+    'season': season,
     'type': 'ANIME',
   }
   
@@ -185,5 +185,5 @@ def get_seasonal_animes_anilist(
   return anime_list
 
 if __name__ == '__main__':
-  result = get_seasonal_animes_anilist(1, 5, ["Drama"])
+  result = get_seasonal_animes_anilist(1, 5, ["Drama"], ['TV'], 2024, "SPRING")
   print(json.dumps(result, indent=2, ensure_ascii=False))

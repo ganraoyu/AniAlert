@@ -5,7 +5,7 @@ from services.anime_service import get_random_anime_suggestion
 from utils.embed_builder import build_random_anime_embed
 from utils.choices import get_choices
 
-MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES = get_choices()
+MEDIA_TYPE_CHOICES, STATUS_TYPE_CHOICES, POPULAR_GENRE_TAG_CHOICES, GENRE_TYPE_CHOICES, YEAR_CHOICES, SEASON_CHOICES = get_choices()
 
 class RandomAnimeCog(commands.Cog):
   def __init__(self, bot):
@@ -26,6 +26,7 @@ class RandomAnimeCog(commands.Cog):
       genre_list = [g.strip() for g in genres.split(',') if g.strip()]
     else:
       genre_list = 'all'
+      
     anime = get_random_anime_suggestion(genre_list, media_type)
 
     embed = build_random_anime_embed(anime)

@@ -108,24 +108,38 @@ class GuessAnimeButton(discord.ui.Button):
   def __init__(self, label: str, correct_answer: str, row: int):
     super().__init__(label=label, style=discord.ButtonStyle.primary, row=row)
     self.correct_answer = correct_answer
-
+    
   async def callback(self, interaction: discord.Interaction):
+    view: GuessAnimeButtonView = self.view
+
     if self.label == self.correct_answer:
       await interaction.response.send_message("✅ Correct!", ephemeral=True)
+      view.stop()  # stop the view to disable buttons
     else:
-      await interaction.response.send_message(
-        f"❌ Nope! The correct answer was: **{self.correct_answer}**",
-        ephemeral=True
-      )
+      if view.guess_count < 1:
+        await interaction.response.send_message("❌ Nope! Try again!", ephemeral=True)
+        view.guess_count += 1
+        return  # stop here, don't send more messages
+      else:
+        await interaction.response.send_message(
+          f"❌ Nope! The correct answer was: **{self.correct_answer}**", ephemeral=True
+        )
+        view.stop()
 
-    self.view.stop()
-    for child in self.view.children:
+    # Disable all buttons once game ends
+    for child in view.children:
       child.disabled = True
-    await interaction.message.edit(view=self.view)
+    try:
+      await interaction.message.edit(view=view)
+    except discord.NotFound:
+      pass
 
 class GuessAnimeButtonView(discord.ui.View):
   def __init__(self, choices: list[str], correct_answer: str, timeout: int = 60):
     super().__init__(timeout=timeout)
+    self.correct_answer = correct_answer
+    self.guess_count = 0
+
     for index, choice in enumerate(choices):
       self.add_item(GuessAnimeButton(label=choice, correct_answer=correct_answer, row=index))
 

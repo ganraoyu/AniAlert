@@ -23,7 +23,7 @@ class NotifyAnimeAiredCog(commands.Cog):
 
   async def _process_user_guild_pair(self, user_id, guild_id):
     anime_list = check_notify_list(user_id, guild_id, self.cursor)
-    aired_list = check_if_aired(anime_list)  # List of (anime, episode) tuples
+    aired_list = check_if_aired(anime_list)  # List of anime dictionaries
 
     if not aired_list:
       return
@@ -36,7 +36,8 @@ class NotifyAnimeAiredCog(commands.Cog):
     if not channel:
       return
 
-    for anime, episode in aired_list:
+    for anime in aired_list:
+      episode = anime['episode']
       await self._handle_anime_notification(anime, episode, user_id, channel)
 
   def _get_notification_channel(self, guild):

@@ -93,8 +93,15 @@ def get_full_anime_info(name: str, results_shown: int = 1, media_type: str = 'al
   return anime_list
 
 
-def get_seasonal_anime_info(page: int, results_shown: int, genres: list[str] = 'all', media_type: str = 'all') -> list:
-  results = get_seasonal_animes_anilist(page, results_shown, genres, media_type)
+def get_seasonal_anime_info(
+    page: int, 
+    results_shown: int, 
+    genres: list[str] = 'all', 
+    media_type: str = 'all', 
+    year: int = 2025, 
+    season: str = 'SUMMER'
+    ) -> list:
+  results = get_seasonal_animes_anilist(page, results_shown, genres, media_type, year, season)
   return results
 
 
