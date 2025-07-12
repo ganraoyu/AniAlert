@@ -1,8 +1,46 @@
 import discord
 from typing import Tuple
+import json
 from utils.embed_builder import build_add_anime_embed, build_remove_anime_embed
 from db.database import cursor, conn
 
+async def check_anime_exists(interaction, query_params, anime_name) -> bool:
+  cursor.execute(
+    """
+    SELECT 1 FROM anime_notify_list
+    WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?
+    """,
+    query_params,
+  )
+
+  if cursor.fetchone():
+    await interaction.response.send_message(
+      f"⚠️ **{anime_name}** is already in your notify list.",
+      ephemeral=True,
+    )
+    return True
+
+  return False
+
+def add_anime_table(query_params, episodes, unix_air_time, iso_air_time, image, episodes_list_json):
+  cursor.execute(
+    """
+    INSERT INTO anime_notify_list (
+      guild_id, guild_name, user_id, user_name,
+      anime_name, episode, unix_air_time, iso_air_time, image, episodes_list
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """,
+    (*query_params, episodes, unix_air_time, iso_air_time, image, episodes_list_json),
+  )
+
+def delete_anime_table(query_params):
+  cursor.execute(
+    """
+    DELETE FROM anime_notify_list
+    WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?
+    """,
+    query_params,
+  ) 
 
 class CombinedAnimeButtonView(discord.ui.View):
   def __init__(self, anime: dict):
@@ -21,44 +59,22 @@ class CombinedAnimeButtonView(discord.ui.View):
   @discord.ui.button(label='Add to notify list', style=discord.ButtonStyle.blurple)
   async def add_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
     guild_id, guild_name, user_id, user_name = await self._get_user_and_guild_info(interaction)
-    anime_name = self.anime.get('title', 'Unknown Title')
-    unix_air_time = self.anime.get('airingAt_unix', 0)
-    iso_air_time = self.anime.get('airingAt_iso', '1970-01-01T00:00:00')
-    image = self.anime.get('image', '')
-    next_episode = int(self.anime.get('episodes', 0)) + 1
 
-    if unix_air_time == 0 or iso_air_time == '1970-01-01T00:00:00':
-      await interaction.response.send_message(
-        f"⚠️ **{anime_name}** has finished airing and has no more upcoming episodes.",
-        ephemeral=True,
-      )
-      return
+    anime_name = self.anime.get('title', 'Unknown Title')
+    episodes = self.anime.get('episodes', 0) + 1
+    episodes_list = self.anime.get('episodes_list', [])
+    image = self.anime.get('image', '')
 
     query_params = (guild_id, guild_name, user_id, user_name, anime_name)
+    await check_anime_exists(interaction, query_params, anime_name)
 
-    cursor.execute(
-      """
-      SELECT 1 FROM anime_notify_list
-      WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?
-      """,
-      query_params,
-    )
-    if cursor.fetchone():
-      await interaction.response.send_message(
-        f"⚠️ **{anime_name}** is already in your notify list.",
-        ephemeral=True,
-      )
-      return
+    episodes_list_json = json.dumps(episodes_list, indent=2, ensure_ascii=False)
 
-    cursor.execute(
-      """
-      INSERT INTO anime_notify_list (
-        guild_id, guild_name, user_id, user_name,
-        anime_name, episode, unix_air_time, iso_air_time, image
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      """,
-      (*query_params, next_episode, unix_air_time, iso_air_time, image),
-    )
+    unix_air_time = self.anime.get('airingAt_unix', 0)
+    iso_air_time = self.anime.get('airingAt_iso', '')
+    
+    add_anime_table(query_params, episodes, unix_air_time, iso_air_time, image, episodes_list_json)
+
     conn.commit()
 
     embed = build_add_anime_embed(self.anime)
@@ -74,27 +90,10 @@ class CombinedAnimeButtonView(discord.ui.View):
     anime_name = self.anime.get('title', 'Unknown Title')
     query_params = (guild_id, guild_name, user_id, user_name, anime_name)
 
-    cursor.execute(
-      """
-      SELECT 1 FROM anime_notify_list
-      WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?
-      """,
-      query_params,
-    )
-    if not cursor.fetchone():
-      await interaction.response.send_message(
-        f"⚠️ **{anime_name}** wasn't in your notify list.",
-        ephemeral=True,
-      )
-      return
+    await check_anime_exists(interaction, query_params, anime_name)
 
-    cursor.execute(
-      """
-      DELETE FROM anime_notify_list
-      WHERE guild_id = ? AND guild_name = ? AND user_id = ? AND user_name = ? AND anime_name = ?
-      """,
-      query_params,
-    )
+    delete_anime_table(query_params)
+
     conn.commit()
 
     embed = build_remove_anime_embed(self.anime)

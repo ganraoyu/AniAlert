@@ -56,6 +56,6 @@ def search_kitsu_anime(query: str):
   return anime_data
 
 if __name__ == '__main__':
-  example = search_kitsu_anime('One piece')
+  example = search_kitsu_anime('Dandadan 2nd Season')
   print(json.dumps(example, indent=4, ensure_ascii=False))
 
