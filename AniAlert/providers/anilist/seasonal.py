@@ -86,16 +86,7 @@ query(
 }
 '''
 
-def get_seasonal_animes_anilist(
-    page: int, 
-    per_page: int, 
-    genres: str = 'all', 
-    media_type: str = 'all', 
-    year: int = YEAR, 
-    season: str = SEASON 
-    ):
-  common_genres, common_tags = get_common_genres_tags()
-
+def build_variables(page, per_page, genres, media_type, year, season, common_tags):
   filtered_genres = []
   filtered_tags = []
 
@@ -105,6 +96,9 @@ def get_seasonal_animes_anilist(
     else:
       filtered_genres.append(genre)
 
+  if season not in ['WINTER', 'SPRING', 'SUMMER', 'FALL']:
+    season = SEASON
+
   variables = {
     'page': page,
     'perPage': per_page,
@@ -112,44 +106,74 @@ def get_seasonal_animes_anilist(
     'season': season,
     'type': 'ANIME',
   }
-  
+
   if genres != 'all' and filtered_genres:
     variables['genres'] = filtered_genres
-
   if genres != 'all' and filtered_tags:
     variables['tags'] = filtered_tags
-
   if media_type != 'all':
     variables['media_type'] = media_type
 
-  if year != 2025:
-    year = year
-  
-  if season not in ['WINTER', 'SPRING', 'SUMMER', 'FALL']:
-    season = SEASON
+  return variables
 
-  
-
+def _fetch_data(variables):
   response = requests.post(
     'https://graphql.anilist.co',
     json={'query': query, 'variables': variables}
   )
   response.raise_for_status()
-  data = response.json()
+  return response.json()
+
+def _clean_description(description: str) -> str:
+  for html_tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>', '\n']:
+    description = description.replace(html_tag, '')
+  return description
+
+def _extract_studios(anime):
+  studios_array = []
+  for studio in anime.get('studios', {}).get('nodes', []):
+    if studio['isAnimationStudio'] == True:
+      studios_array.append(studio.get('name', 'Unknown Studio'))
+  return studios_array
+
+def _extract_episodes_list(airing_nodes):
+  episode_list = []
+  for node in airing_nodes:
+    airing_at_unix = node.get('airingAt', 0)
+    airing_at_iso = datetime.datetime.utcfromtimestamp(airing_at_unix).strftime("%Y-%m-%dT%H:%M:%S") if airing_at_unix else None
+    time_until_airing = convert_unix(node.get('timeUntilAiring', 0))
+    episode = node.get('episode', 0)
+
+    episode_list.append({
+      'airingAt_unix': airing_at_unix,
+      'airingAt_iso': airing_at_iso,
+      'time_until_airing': time_until_airing,
+      'episode': episode
+    })
+  return episode_list
+
+def get_seasonal_animes_anilist(
+    page: int,
+    per_page: int,
+    genres: Union[List[str], str] = 'all',
+    media_type: Union[List[str], str] = 'all',
+    year: int = YEAR,
+    season: str = SEASON
+):
+  common_genres, common_tags = get_common_genres_tags()
+
+  variables = build_variables(page, per_page, genres, media_type, year, season, common_tags)
+  data = _fetch_data(variables)
 
   anime_list = []
 
-  for index, anime in enumerate(data.get('data', {}).get('Page', {}).get('media', [])):
+  for anime in data.get('data', {}).get('Page', {}).get('media', []):
     anilist_id = anime.get('id', -1)
     title_info = anime.get('title', {})
     title = title_info.get('english') or title_info.get('romaji') or 'Unknown Title'
 
-    studios_array = []
+    studios_array = _extract_studios(anime)
 
-    for studio in anime.get('studios', {}).get('nodes', []):
-      if studio['isAnimationStudio'] == True:
-        studios_array.append(studio.get('name', 'Unknown Studio'))
-  
     show_type = anime.get('format')
     genres = anime.get('genres', [])
     tags = anime.get('tags', [])
@@ -160,27 +184,25 @@ def get_seasonal_animes_anilist(
 
     genres = filtered_tag_names + genres
     average_score = anime.get('averageScore', 0)
-    description = anime.get('description', '') or ''
+    description = _clean_description(anime.get('description', '') or '')
     image_url = anime.get('coverImage', {}).get('extraLarge')
 
     airing_nodes = anime.get('airingSchedule', {}).get('nodes', [])
+
     first_airing = airing_nodes[0] if airing_nodes else {}
     airing_at_unix = first_airing.get('airingAt')
-    airing_at_iso = None
-    time_until_airing = convert_unix(first_airing.get('timeUntilAiring'))
-    episodes = anime.get('episodes', 0)
+    airing_at_iso = datetime.datetime.utcfromtimestamp(airing_at_unix).strftime("%Y-%m-%dT%H:%M:%S") if airing_at_unix else None
+    time_until_airing = convert_unix(first_airing.get('timeUntilAiring')) if first_airing else None
+    episodes = first_airing.get('episode') - 1 if first_airing else anime.get('episodes', 0)
+
+    episode_list = _extract_episodes_list(airing_nodes)
+
     status = anime.get('status', 'Unknown').upper()
-
-    if airing_at_unix:
-      airing_at_iso = datetime.datetime.utcfromtimestamp(airing_at_unix).strftime("%Y-%m-%dT%H:%M:%S")
-
-    for html_tag in ['<b>', '</b>', '<br>', '<i>', '</i>', '<i/>', '\n']:
-      description = description.replace(html_tag, '')
 
     anime_list.append({
       'anilist_id': anilist_id,
       'title': title,
-      'studios':', '.join(set(studios_array)),
+      'studios': ', '.join(set(studios_array)),
       'show_type': show_type,
       'genres': ', '.join(genres[:4]),
       'average_rating': average_score,
@@ -189,12 +211,13 @@ def get_seasonal_animes_anilist(
       'airingAt_unix': airing_at_unix,
       'airingAt_iso': airing_at_iso,
       'time_until_airing': time_until_airing,
-      'episodes': episodes,
       'status': status,
+      'episodes': episodes,
+      'episodes_list': episode_list
     })
 
   return anime_list
 
 if __name__ == '__main__':
-  result = get_seasonal_animes_anilist(1, 5, ["Drama"], ['TV'], 2025, "SUMMER")
+  result = get_seasonal_animes_anilist(1, 1, ["Drama"], ['TV'], 2025, "SUMMER")
   print(json.dumps(result, indent=2, ensure_ascii=False))

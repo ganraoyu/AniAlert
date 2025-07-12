@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 from AniAlert.providers.anilist.search import search_anime_anilist
 from AniAlert.providers.anilist.seasonal import get_seasonal_animes_anilist
 from AniAlert.providers.anilist.randomize import get_random_anime
@@ -74,17 +73,20 @@ def get_full_anime_info(name: str, results_shown: int = 1, media_type: str = 'al
     anime['status'] = media.get('status', 'Unknown').upper()
 
     nodes = extract_airing_nodes(anilist_data)
+    nodes = extract_airing_nodes(anilist_data)
     genres = media.get('genres', [])
     anime['genres'] = ', '.join(genres) if genres else 'N/A'
-
+    anime['airing'] = media.get('status') == "RELEASING"
     airing_time_stamps = media.get('airingSchedule', {}).get('nodes', [])
 
     if airing_time_stamps:
       next_ep = airing_time_stamps[0]
+      anime['episodes'] = next_ep.get('episode', 0)
       anime['time_until_airing'] = next_ep.get('time_until_airing')  
       anime['airingAt_iso'] = next_ep.get('airingAt_iso')
       anime['airingAt_unix'] = next_ep.get('airingAt_unix')
     else:
+      anime['episodes'] = 0
       anime['time_until_airing'] = None
       anime['airingAt_iso'] = None
       anime['airingAt_unix'] = None
@@ -106,7 +108,7 @@ def get_seasonal_anime_info(
 
 
 def get_random_anime_suggestion(genres: list[str], media_type: str = 'all') -> list:
-  results = get_random_anime(genres)
+  results = get_random_anime(genres, media_type)
   return results
 
 
