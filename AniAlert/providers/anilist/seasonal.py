@@ -80,6 +80,7 @@ query(
           episode
         }
       }
+      status
     }
   }
 }
@@ -159,7 +160,8 @@ def get_seasonal_animes_anilist(
     airing_at_unix = first_airing.get('airingAt')
     airing_at_iso = None
     time_until_airing = convert_unix(first_airing.get('timeUntilAiring'))
-    episodes = first_airing.get('episode')
+    episodes = anime.get('episodes', 0)
+    status = anime.get('status', 'Unknown').upper()
 
     if airing_at_unix:
       airing_at_iso = datetime.datetime.utcfromtimestamp(airing_at_unix).strftime("%Y-%m-%dT%H:%M:%S")
@@ -179,11 +181,12 @@ def get_seasonal_animes_anilist(
       'airingAt_unix': airing_at_unix,
       'airingAt_iso': airing_at_iso,
       'time_until_airing': time_until_airing,
-      'episodes': episodes
+      'episodes': episodes,
+      'status': status,
     })
 
   return anime_list
 
 if __name__ == '__main__':
-  result = get_seasonal_animes_anilist(1, 5, ["Drama"], ['TV'], 2024, "SPRING")
+  result = get_seasonal_animes_anilist(1, 5, ["Drama"], ['TV'], 2025, "SUMMER")
   print(json.dumps(result, indent=2, ensure_ascii=False))

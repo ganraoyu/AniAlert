@@ -70,17 +70,18 @@ def get_full_anime_info(name: str, results_shown: int = 1, media_type: str = 'al
       anime['time_until_airing'] = None
       anime['airingAt_iso'] = None
       continue
+      
+    anime['status'] = media.get('status', 'Unknown').upper()
 
     nodes = extract_airing_nodes(anilist_data)
     genres = media.get('genres', [])
     anime['genres'] = ', '.join(genres) if genres else 'N/A'
-    anime['airing'] = bool(nodes)
 
     airing_time_stamps = media.get('airingSchedule', {}).get('nodes', [])
 
     if airing_time_stamps:
       next_ep = airing_time_stamps[0]
-      anime['time_until_airing'] = next_ep.get('time_until_airing')  # ✅ already formatted!
+      anime['time_until_airing'] = next_ep.get('time_until_airing')  
       anime['airingAt_iso'] = next_ep.get('airingAt_iso')
       anime['airingAt_unix'] = next_ep.get('airingAt_unix')
     else:

@@ -136,7 +136,7 @@ def get_random_anime(genres: list[str], media_type: str = 'all') -> dict:
 
   show_type = anime['format']
   average_rating = anime['averageScore']
-  airing_status = anime_details['airing']
+  status = anime['status']
 
   result = {
       "title": title,
@@ -147,7 +147,7 @@ def get_random_anime(genres: list[str], media_type: str = 'all') -> dict:
       "studios": studios_str,
       "show_type": show_type,
       "average_rating": average_rating,
-      "airing": airing_status,
+      "status": status,
       "remaining_anime_titles": remaining_anime_titles,
   }
 
