@@ -34,6 +34,7 @@ query($search: String){
       season
       year
     }
+    status
   }
 }
 '''

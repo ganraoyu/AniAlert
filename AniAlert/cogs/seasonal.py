@@ -68,7 +68,7 @@ class SeasonalAnimeLookUpCog(commands.Cog):
       genres.value if genres else None,
       media_type.value if media_type else None,
       year.value if year else 2025,
-      season.value if season else 'Summer'
+      season.value if season else 'SUMMER'
     )
 
     if not animes:

@@ -9,7 +9,7 @@ def get_anime_variables(anime: dict):
   show_type = str(anime.get('show_type') or 'N/A')
   rating = str(anime.get('average_rating') or 'N/A')
   episodes = str(anime.get('episodes') or 0)
-  airing = str(anime.get('airing') or 'N/A')
+  status = str(anime.get('status') or 'N/A').upper()
   ranking = str(anime.get('ranking') or 'N/A')
   genres = str(anime.get('genres') or 'Unknown')
   image = anime.get('image')
@@ -24,7 +24,7 @@ def get_anime_variables(anime: dict):
     'show_type': show_type,
     'rating': rating,
     'episodes': episodes,
-    'airing': airing,
+    'status': status,
     'ranking': ranking,
     'genres': genres,
     'image': image,
@@ -44,7 +44,7 @@ def build_search_anime_embed(anime: dict) -> discord.Embed:
   embed.add_field(name='📺 Type', value=vars['show_type'], inline=True)
   embed.add_field(name='⭐ Rating', value=vars['rating'], inline=True)
   embed.add_field(name='🎞️ Episodes', value=vars['episodes'], inline=True)
-  embed.add_field(name='🗓️ Airing', value=vars['airing'], inline=True)
+  embed.add_field(name='🗓️ Status', value=vars['status'], inline=True)
   embed.add_field(name='🏆 Rank', value=vars['ranking'], inline=True)
   embed.add_field(name='🎭 Genres', value=vars['genres'], inline=True)
 
@@ -140,7 +140,7 @@ def build_random_anime_embed(anime: dict):
   embed.add_field(name='📺 Type', value=vars['show_type'], inline=True)  
   embed.add_field(name='⭐ Rating', value=vars['rating'], inline=True)
   embed.add_field(name='🎞️ Episodes', value=vars['episodes'], inline=True)
-  embed.add_field(name='🗓️ Airing', value=vars['airing'], inline=True)
+  embed.add_field(name='🗓️ Status', value=vars['status'], inline=True)
   embed.add_field(name='🎬 Studios', value=vars['studios'], inline=True)
   embed.add_field(name='🎭 Genres', value=vars['genres'], inline=True)
 

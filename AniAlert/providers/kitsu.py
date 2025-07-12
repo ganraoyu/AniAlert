@@ -34,7 +34,6 @@ def search_kitsu_anime(query: str):
     kitsu_id = anime.get('id', '-0')
     title = attribute.get('canonicalTitle', 'Unknown Title')
     show_type = attribute.get('showType', 'Unknown Type')
-    status = attribute.get('status', 'Unknown Status')
     average_rating = attribute.get('averageRating', 'N/A')
     ranking = attribute.get('ratingRank', 'N/A')
     synopsis = attribute.get('synopsis', 'No synopsis available')
@@ -42,16 +41,10 @@ def search_kitsu_anime(query: str):
     length_per_episode = attribute.get('totalLength', -0)
     image = attribute.get('posterImage', {}).get('original', '')
 
-    if status == 'current':
-      status = 'airing'
-    else:
-      status = 'completed'
-
     anime_data.append({
       'kitsu_id':  kitsu_id,
       'title': title,
       'show_type': show_type,
-      'status': status,
       'average_rating': average_rating,
       'ranking': ranking,
       'synopsis': synopsis,
